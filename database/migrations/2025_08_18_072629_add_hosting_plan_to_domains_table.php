@@ -12,10 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('domains', function (Blueprint $table) {
-            $table->string('hosting_plan')->default('monthly')->after('annual_cost');
-            $table->decimal('monthly_cost', 10, 2)->nullable()->after('hosting_plan');
-            $table->decimal('quarterly_cost', 10, 2)->nullable()->after('monthly_cost');
-            $table->decimal('yearly_cost', 10, 2)->nullable()->after('quarterly_cost');
+            //
         });
     }
 
@@ -25,7 +22,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('domains', function (Blueprint $table) {
-            $table->dropColumn(['hosting_plan', 'monthly_cost', 'quarterly_cost', 'yearly_cost']);
+            //
         });
     }
 };

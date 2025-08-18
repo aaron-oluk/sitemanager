@@ -51,7 +51,9 @@ class EmailController extends Controller
     {
         $domains = Domain::orderBy('domain_name')->pluck('domain_name', 'id');
         $websites = Website::orderBy('name')->pluck('name', 'id');
-        return view('emails.create', compact('domains', 'websites'));
+        $hostingPlans = Email::getHostingPlanOptions();
+        $statusOptions = Email::getStatusOptions();
+        return view('emails.create', compact('domains', 'websites', 'hostingPlans', 'statusOptions'));
     }
 
     /**
@@ -95,7 +97,9 @@ class EmailController extends Controller
 
     public function edit(Email $email): View
     {
-        return view('emails.edit', compact('email'));
+        $domains = Domain::orderBy('domain_name')->pluck('domain_name', 'id');
+        $websites = Website::orderBy('name')->pluck('name', 'id');
+        return view('emails.edit', compact('email', 'domains', 'websites'));
     }
 
     public function update(Request $request, Email $email): RedirectResponse
@@ -107,10 +111,22 @@ class EmailController extends Controller
             'monthly_cost' => 'required|numeric|min:0',
             'start_date' => 'required|date',
             'renewal_date' => 'required|date|after:start_date',
-            'status' => 'required|in:active,suspended,cancelled',
+            'status' => 'required|in:active,inactive,suspended,pending,cancelled',
             'notes' => 'nullable|string',
-            'associated_website' => 'nullable|string|max:255',
+            'associated_website' => 'nullable|exists:websites,id',
+            'domain_id' => 'nullable|exists:domains,id',
         ]);
+
+        // Auto-assign domain if not provided
+        if (empty($validated['domain_id'])) {
+            $emailParts = explode('@', $validated['email_address']);
+            $domainName = end($emailParts);
+            
+            $domain = Domain::where('domain_name', $domainName)->first();
+            if ($domain) {
+                $validated['domain_id'] = $domain->id;
+            }
+        }
 
         $email->update($validated);
 

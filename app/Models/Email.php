@@ -19,7 +19,7 @@ class Email extends Model
         'status',
         'notes',
         'associated_website',
-        'domain_id', // Add domain relationship
+        'domain_id',
     ];
 
     protected $casts = [
@@ -87,5 +87,34 @@ class Email extends Model
     public function getFormattedMonthlyCostAttribute(): string
     {
         return '$' . number_format($this->monthly_cost, 2);
+    }
+
+    /**
+     * Get hosting plan options
+     */
+    public static function getHostingPlanOptions(): array
+    {
+        return [
+            'monthly' => 'Monthly',
+            'quarterly' => 'Quarterly',
+            'biannual' => 'Bi-Annual',
+            'annual' => 'Annual',
+            'biennial' => 'Bi-Annual (2 Years)',
+            'triennial' => 'Tri-Annual (3 Years)',
+        ];
+    }
+
+    /**
+     * Get status options
+     */
+    public static function getStatusOptions(): array
+    {
+        return [
+            'active' => 'Active',
+            'inactive' => 'Inactive',
+            'suspended' => 'Suspended',
+            'pending' => 'Pending',
+            'cancelled' => 'Cancelled',
+        ];
     }
 }

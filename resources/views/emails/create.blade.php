@@ -39,7 +39,11 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Hosting Plan</label>
-                        <input name="hosting_plan" value="{{ old('hosting_plan') }}" required class="mt-1 w-full rounded-xl border-gray-300 focus:ring-2 focus:ring-blue-500" />
+                        <select name="hosting_plan" class="mt-1 w-full rounded-xl border-gray-300 focus:ring-2 focus:ring-blue-500">
+                            @foreach(['monthly' => 'Monthly', 'quarterly' => 'Quarterly', 'biannual' => 'Bi-Annual', 'annual' => 'Annual', 'biennial' => 'Bi-Annual (2 Years)', 'triennial' => 'Tri-Annual (3 Years)'] as $value => $label)
+                                <option value="{{ $value }}" {{ old('hosting_plan') == $value ? 'selected' : '' }}>{{ $label }}</option>
+                            @endforeach
+                        </select>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Monthly Cost</label>
@@ -65,8 +69,8 @@
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Status</label>
                         <select name="status" class="mt-1 w-full rounded-xl border-gray-300 focus:ring-2 focus:ring-blue-500">
-                            @foreach(['active','inactive','suspended'] as $status)
-                                <option value="{{ $status }}" {{ old('status')===$status?'selected':'' }}>{{ ucfirst($status) }}</option>
+                            @foreach(['active' => 'Active', 'inactive' => 'Inactive', 'suspended' => 'Suspended', 'pending' => 'Pending', 'cancelled' => 'Cancelled'] as $value => $label)
+                                <option value="{{ $value }}" {{ old('status') == $value ? 'selected' : '' }}>{{ $label }}</option>
                             @endforeach
                         </select>
                     </div>
