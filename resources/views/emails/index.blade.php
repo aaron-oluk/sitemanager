@@ -67,7 +67,7 @@
                                         <tr>
                                             <td class="px-4 py-3">
                                                 <div>
-                                                    <p class="text-sm font-medium text-gray-900">{{ $email->username }}@{{ $email->domain_from_email }}</p>
+                                                    <p class="text-sm font-medium text-gray-900">{{ $email->email_address }}</p>
                                                     @if($email->website)
                                                         <p class="text-xs text-blue-600">{{ $email->website->name }}</p>
                                                     @endif
