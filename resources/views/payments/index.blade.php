@@ -21,6 +21,7 @@
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Method</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">USD Equivalent</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                                 <th class="px-4 py-3"></th>
                             </tr>
@@ -31,7 +32,12 @@
                                     <td class="px-4 py-3 text-sm text-gray-900 font-medium">{{ $payment->website->name ?? 'N/A' }}</td>
                                     <td class="px-4 py-3 text-sm text-gray-700">{{ $payment->payment_method }}</td>
                                     <td class="px-4 py-3 text-sm text-gray-700">{{ optional($payment->payment_date)->format('M d, Y') }}</td>
-                                    <td class="px-4 py-3 text-sm text-gray-900 font-semibold">${{ number_format($payment->amount, 2) }}</td>
+                                    <td class="px-4 py-3 text-sm text-gray-900 font-semibold">
+                                        {{ $payment->formatted_amount }}
+                                    </td>
+                                    <td class="px-4 py-3 text-sm text-gray-600">
+                                        {{ $payment->formatted_usd_equivalent }}
+                                    </td>
                                     <td class="px-4 py-3 text-sm">
                                         <span class="px-2 py-1 rounded-full text-xs {{ $payment->status === 'completed' ? 'bg-green-100 text-green-700' : ($payment->status === 'pending' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700') }}">{{ ucfirst($payment->status) }}</span>
                                     </td>
@@ -47,7 +53,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="6" class="px-4 py-6 text-center text-gray-500">No payments found.</td>
+                                    <td colspan="7" class="px-4 py-6 text-center text-gray-500">No payments found.</td>
                                 </tr>
                             @endforelse
                         </tbody>

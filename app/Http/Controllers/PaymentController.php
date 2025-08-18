@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Payment;
 use App\Models\Website;
+use App\Services\CurrencyService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -11,6 +12,13 @@ use Illuminate\Http\RedirectResponse;
 
 class PaymentController extends Controller
 {
+    protected $currencyService;
+
+    public function __construct(CurrencyService $currencyService)
+    {
+        $this->currencyService = $currencyService;
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -26,7 +34,8 @@ class PaymentController extends Controller
     public function create(): View
     {
         $websites = Website::orderBy('name')->pluck('name', 'id');
-        return view('payments.create', compact('websites'));
+        $currencies = $this->currencyService->getAvailableCurrencies();
+        return view('payments.create', compact('websites', 'currencies'));
     }
 
     /**
@@ -37,6 +46,7 @@ class PaymentController extends Controller
         $validated = $request->validate([
             'website_id' => 'required|exists:websites,id',
             'amount' => 'required|numeric|min:0',
+            'currency' => 'required|string|in:' . implode(',', $this->currencyService->getAvailableCurrencies()),
             'payment_method' => 'required|string|max:255',
             'transaction_id' => 'nullable|string|max:255',
             'payment_date' => 'required|date',
@@ -46,6 +56,9 @@ class PaymentController extends Controller
 
         // Generate receipt number if not provided
         $validated['receipt_number'] = $validated['receipt_number'] ?? 'RCT-' . strtoupper(uniqid());
+        
+        // Calculate USD equivalent
+        $validated['usd_equivalent'] = $this->currencyService->toUSD($validated['amount'], $validated['currency']);
 
         Payment::create($validated);
 
@@ -67,7 +80,8 @@ class PaymentController extends Controller
     public function edit(Payment $payment): View
     {
         $websites = Website::orderBy('name')->pluck('name', 'id');
-        return view('payments.edit', compact('payment', 'websites'));
+        $currencies = $this->currencyService->getAvailableCurrencies();
+        return view('payments.edit', compact('payment', 'websites', 'currencies'));
     }
 
     /**
@@ -78,12 +92,16 @@ class PaymentController extends Controller
         $validated = $request->validate([
             'website_id' => 'required|exists:websites,id',
             'amount' => 'required|numeric|min:0',
+            'currency' => 'required|string|in:' . implode(',', $this->currencyService->getAvailableCurrencies()),
             'payment_method' => 'required|string|max:255',
             'transaction_id' => 'nullable|string|max:255',
             'payment_date' => 'required|date',
             'status' => 'required|in:completed,pending,failed',
             'notes' => 'nullable|string',
         ]);
+
+        // Calculate USD equivalent
+        $validated['usd_equivalent'] = $this->currencyService->toUSD($validated['amount'], $validated['currency']);
 
         $payment->update($validated);
 

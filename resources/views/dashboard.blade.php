@@ -262,8 +262,8 @@
                                 </div>
                             </div>
                             <div class="text-right">
-                                <p class="text-sm font-medium text-gray-900">${{ number_format($payment->amount, 2) }}</p>
-                                <p class="text-xs text-gray-500">{{ $payment->payment_date->format('M d, Y') }}</p>
+                                <p class="text-sm font-medium text-gray-900">{{ $payment->formatted_amount }}</p>
+                                <p class="text-xs text-gray-500">{{ $payment->formatted_usd_equivalent }}</p>
                             </div>
                         </div>
                         @empty

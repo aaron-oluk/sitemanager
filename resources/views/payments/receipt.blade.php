@@ -17,6 +17,7 @@
         .label { color:#6b7280; font-size:12px; }
         .value { font-size:14px; font-weight:600; }
         .totals { text-align:right; margin-top: 12px; }
+        .currency-info { background: #f3f4f6; padding: 12px; border-radius: 8px; margin-top: 12px; }
     </style>
  </head>
  <body>
@@ -60,12 +61,34 @@
             <div class="row">
                 <div class="col">
                     <div class="label">Amount</div>
-                    <div class="value">${{ number_format($payment->amount, 2) }}</div>
+                    <div class="value">
+                        @if($payment->currency === 'UGX')
+                            USh {{ number_format($payment->amount, 0) }}
+                        @elseif($payment->currency === 'USD')
+                            ${{ number_format($payment->amount, 2) }}
+                        @elseif($payment->currency === 'EUR')
+                            €{{ number_format($payment->amount, 2) }}
+                        @elseif($payment->currency === 'GBP')
+                            £{{ number_format($payment->amount, 2) }}
+                        @elseif($payment->currency === 'KES')
+                            KSh {{ number_format($payment->amount, 2) }}
+                        @elseif($payment->currency === 'TZS')
+                            TSh {{ number_format($payment->amount, 2) }}
+                        @elseif($payment->currency === 'NGN')
+                            ₦{{ number_format($payment->amount, 2) }}
+                        @else
+                            {{ $payment->currency }} {{ number_format($payment->amount, 2) }}
+                        @endif
+                    </div>
                 </div>
                 <div class="col">
                     <div class="label">Status</div>
                     <div class="value">{{ ucfirst($payment->status) }}</div>
                 </div>
+            </div>
+            <div class="currency-info">
+                <div class="label">USD Equivalent</div>
+                <div class="value">${{ number_format($payment->usd_equivalent ?? 0, 2) }}</div>
             </div>
             @if($payment->transaction_id)
             <div class="row" style="margin-top:12px;">

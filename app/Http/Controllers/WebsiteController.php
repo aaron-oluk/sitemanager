@@ -16,7 +16,7 @@ class WebsiteController extends Controller
     {
         $websites = Website::with('payments')->latest()->paginate(10);
         $totalWebsites = Website::count();
-        $totalRevenue = Payment::sum('amount');
+        $totalRevenue = Payment::sum('usd_equivalent'); // Use USD equivalent
         $activeWebsites = Website::where('status', 'active')->count();
         
         return view('websites.index', compact('websites', 'totalWebsites', 'totalRevenue', 'activeWebsites'));
@@ -90,9 +90,12 @@ class WebsiteController extends Controller
         $emails = Email::latest()->take(5)->get();
         $recentPayments = Payment::with('website')->latest()->take(5)->get();
         
-        // Get monthly revenue (current month)
+        // Get monthly revenue (current month) - use USD equivalent
         $currentMonth = now()->startOfMonth();
-        $monthlyRevenue = Payment::where('payment_date', '>=', $currentMonth)->sum('amount');
+        $monthlyRevenue = Payment::where('payment_date', '>=', $currentMonth)->sum('usd_equivalent');
+        
+        // Get total revenue in USD (using usd_equivalent field)
+        $totalRevenue = Payment::sum('usd_equivalent');
         
         // Get total domain cost
         $totalDomainCost = Domain::sum('annual_cost');
@@ -102,7 +105,7 @@ class WebsiteController extends Controller
         
         $stats = [
             'total_websites' => Website::count(),
-            'total_revenue' => Payment::sum('amount'),
+            'total_revenue' => $totalRevenue,
             'monthly_revenue' => $monthlyRevenue,
             'active_websites' => Website::where('status', 'active')->count(),
             'total_domains' => Domain::count(),

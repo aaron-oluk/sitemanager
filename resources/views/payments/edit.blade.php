@@ -29,12 +29,26 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700">Amount</label>
-                        <input type="number" step="0.01" name="amount" value="{{ old('amount', $payment->amount) }}" required class="mt-1 w-full rounded-xl border-gray-300 focus:ring-2 focus:ring-blue-500" />
-                    </div>
-                    <div>
                         <label class="block text-sm font-medium text-gray-700">Payment Method</label>
                         <input name="payment_method" value="{{ old('payment_method', $payment->payment_method) }}" required class="mt-1 w-full rounded-xl border-gray-300 focus:ring-2 focus:ring-blue-500" />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Amount</label>
+                        <input type="number" step="0.01" name="amount" id="amount" value="{{ old('amount', $payment->amount) }}" required class="mt-1 w-full rounded-xl border-gray-300 focus:ring-2 focus:ring-blue-500" />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Currency</label>
+                        <select name="currency" id="currency" class="mt-1 w-full rounded-xl border-gray-300 focus:ring-2 focus:ring-blue-500">
+                            @foreach($currencies as $currency)
+                                <option value="{{ $currency }}" {{ old('currency', $payment->currency)==$currency?'selected':'' }}>{{ $currency }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">USD Equivalent</label>
+                        <div class="mt-1 p-3 bg-gray-50 rounded-xl text-sm text-gray-600" id="usd-equivalent">
+                            {{ $payment->formatted_usd_equivalent }}
+                        </div>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Transaction ID (optional)</label>
@@ -66,6 +80,34 @@
             </form>
         </div>
     </div>
+
+    <script>
+        // Currency conversion rates (simplified - in real app, these would come from the server)
+        const exchangeRates = {
+            'USD': 1.0,
+            'UGX': 0.00027,
+            'EUR': 1.08,
+            'GBP': 1.26,
+            'KES': 0.0069,
+            'TZS': 0.00039,
+            'NGN': 0.00066,
+        };
+
+        function updateUsdEquivalent() {
+            const amount = parseFloat(document.getElementById('amount').value) || 0;
+            const currency = document.getElementById('currency').value;
+            const rate = exchangeRates[currency] || 1.0;
+            const usdAmount = amount * rate;
+            
+            document.getElementById('usd-equivalent').textContent = '$' + usdAmount.toFixed(2);
+        }
+
+        document.getElementById('amount').addEventListener('input', updateUsdEquivalent);
+        document.getElementById('currency').addEventListener('change', updateUsdEquivalent);
+        
+        // Initialize on page load
+        updateUsdEquivalent();
+    </script>
 </x-app-layout>
 
 

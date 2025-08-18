@@ -16,7 +16,15 @@
                     </div>
                     <div>
                         <dt class="text-sm text-gray-500">Amount</dt>
-                        <dd class="mt-1 text-gray-900 font-medium">${{ number_format($payment->amount, 2) }}</dd>
+                        <dd class="mt-1 text-gray-900 font-medium">{{ $payment->formatted_amount }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm text-gray-500">USD Equivalent</dt>
+                        <dd class="mt-1 text-gray-600">{{ $payment->formatted_usd_equivalent }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm text-gray-500">Currency</dt>
+                        <dd class="mt-1 text-gray-900 font-medium">{{ $payment->currency }}</dd>
                     </div>
                     <div>
                         <dt class="text-sm text-gray-500">Method</dt>
