@@ -11,9 +11,42 @@
             <div class="bg-white rounded-2xl shadow border border-gray-100 p-6">
                 <dl class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <dt class="text-sm text-gray-500">Domain</dt>
-                        <dd class="mt-1 text-gray-900 font-medium">{{ $website->domain }}</dd>
+                        <dt class="text-sm text-gray-500">Website Name</dt>
+                        <dd class="mt-1 text-gray-900 font-medium">{{ $website->name }}</dd>
                     </div>
+                    <div>
+                        <dt class="text-sm text-gray-500">Domain</dt>
+                        <dd class="mt-1 text-gray-900 font-medium">{{ $website->domain_name }}</dd>
+                    </div>
+                    @if($website->domain_id)
+                    <div>
+                        <dt class="text-sm text-gray-500">Linked Domain</dt>
+                        <dd class="mt-1 text-gray-900 font-medium">
+                            <a href="{{ route('domains.show', $website->domain_id) }}" class="text-blue-600 hover:text-blue-800">
+                                {{ $website->domainRelation->domain_name ?? 'N/A' }}
+                            </a>
+                        </dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm text-gray-500">Domain Registration Date</dt>
+                        <dd class="mt-1 text-gray-900 font-medium">
+                            {{ optional($website->domainRelation->registration_date)->format('M d, Y') ?? 'N/A' }}
+                        </dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm text-gray-500">Domain Expiry Date</dt>
+                        <dd class="mt-1 text-gray-900 font-medium">
+                            @if($website->domainRelation && $website->domainRelation->isExpiringSoon())
+                                <span class="text-orange-600 font-medium">
+                                    {{ optional($website->domainRelation->expiry_date)->format('M d, Y') }} 
+                                    ({{ $website->domainRelation->days_until_expiry }} days)
+                                </span>
+                            @else
+                                {{ optional($website->domainRelation->expiry_date)->format('M d, Y') ?? 'N/A' }}
+                            @endif
+                        </dd>
+                    </div>
+                    @endif
                     <div>
                         <dt class="text-sm text-gray-500">Host Server</dt>
                         <dd class="mt-1 text-gray-900 font-medium">{{ $website->host_server }}</dd>
@@ -24,17 +57,27 @@
                     </div>
                     <div>
                         <dt class="text-sm text-gray-500">Amount Paid</dt>
-                        <dd class="mt-1 text-gray-900 font-medium">${{ number_format($website->amount_paid, 2) }}</dd>
+                        <dd class="mt-1 text-gray-900 font-medium">{{ $website->formatted_amount }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm text-gray-500">Currency</dt>
+                        <dd class="mt-1 text-gray-900 font-medium">{{ $website->currency }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm text-gray-500">USD Equivalent</dt>
+                        <dd class="mt-1 text-gray-600">{{ $website->formatted_usd_equivalent }}</dd>
                     </div>
                     <div>
                         <dt class="text-sm text-gray-500">Status</dt>
-                        <dd class="mt-1">
-                            <span class="px-2 py-1 rounded-full text-xs {{ $website->status === 'active' ? 'bg-green-100 text-green-700' : ($website->status === 'maintenance' ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-700') }}">{{ ucfirst($website->status) }}</span>
-                        </dd>
+                        <dd class="mt-1"><span class="px-2 py-1 rounded-full text-xs {{ $website->status === 'active' ? 'bg-green-100 text-green-700' : ($website->status === 'inactive' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700') }}">{{ ucfirst($website->status) }}</span></dd>
                     </div>
                     <div>
-                        <dt class="text-sm text-gray-500">Client</dt>
-                        <dd class="mt-1 text-gray-900 font-medium">{{ $website->client_name }} <span class="text-gray-500">{{ $website->client_email }}</span></dd>
+                        <dt class="text-sm text-gray-500">Client Name</dt>
+                        <dd class="mt-1 text-gray-900 font-medium">{{ $website->client_name }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm text-gray-500">Client Email</dt>
+                        <dd class="mt-1 text-gray-900 font-medium">{{ $website->client_email }}</dd>
                     </div>
                 </dl>
                 @if($website->description)

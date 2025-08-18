@@ -45,10 +45,10 @@
                             @forelse ($websites as $website)
                                 <tr>
                                     <td class="px-4 py-3 text-sm text-gray-900 font-medium">{{ $website->name }}</td>
-                                    <td class="px-4 py-3 text-sm text-blue-700">{{ $website->domain }}</td>
+                                    <td class="px-4 py-3 text-sm text-blue-700">{{ $website->domain_name }}</td>
                                     <td class="px-4 py-3 text-sm text-gray-700">{{ $website->host_server }}</td>
                                     <td class="px-4 py-3 text-sm text-gray-700">{{ optional($website->deployment_date)->format('M d, Y') }}</td>
-                                    <td class="px-4 py-3 text-sm text-gray-900 font-semibold">${{ number_format($website->amount_paid, 2) }}</td>
+                                    <td class="px-4 py-3 text-sm text-gray-900 font-semibold">{{ $website->formatted_amount }}</td>
                                     <td class="px-4 py-3 text-sm">
                                         <span class="px-2 py-1 rounded-full text-xs {{ $website->status === 'active' ? 'bg-green-100 text-green-700' : ($website->status === 'maintenance' ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-700') }}">{{ ucfirst($website->status) }}</span>
                                     </td>

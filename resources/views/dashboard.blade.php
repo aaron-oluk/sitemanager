@@ -219,12 +219,21 @@
                                 </div>
                                 <div>
                                     <p class="font-medium text-gray-900">{{ $website->name }}</p>
-                                    <p class="text-sm text-gray-500">{{ $website->domain }}</p>
+                                    <p class="text-sm text-gray-500">{{ $website->domain_name }}</p>
+                                    @if($website->domain_id && $website->domainRelation && is_object($website->domainRelation))
+                                        <p class="text-xs text-blue-600">
+                                            Domain expires: {{ optional($website->domainRelation->expiry_date)->format('M d, Y') }}
+                                            @if($website->domainRelation->isExpiringSoon())
+                                                <span class="text-orange-600 font-medium">({{ $website->domainRelation->days_until_expiry }} days)</span>
+                                            @endif
+                                        </p>
+                                    @endif
                                 </div>
                             </div>
                             <div class="text-right">
-                                <p class="text-sm font-medium text-gray-900">${{ number_format($website->amount_paid, 2) }}</p>
-                                <p class="text-xs text-gray-500">{{ $website->status }}</p>
+                                <p class="text-sm font-medium text-gray-900">{{ $website->status }}</p>
+                                <p class="text-xs text-gray-500">{{ optional($website->deployment_date)->format('M d, Y') }}</p>
+                                <p class="text-xs text-gray-600">{{ $website->formatted_amount }}</p>
                             </div>
                         </div>
                         @empty

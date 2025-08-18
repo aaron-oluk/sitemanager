@@ -1,11 +1,12 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\WebsiteController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\DomainController;
 use App\Http\Controllers\EmailController;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\CurrencyRateController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -32,6 +33,11 @@ Route::middleware('auth')->group(function () {
     
     // Emails
     Route::resource('emails', EmailController::class);
+    
+    // Currency Rates
+    Route::get('/currency-rates', [CurrencyRateController::class, 'index'])->name('currency-rates.index');
+    Route::post('/currency-rates/refresh', [CurrencyRateController::class, 'refresh'])->name('currency-rates.refresh');
+    Route::get('/currency-rates/api', [CurrencyRateController::class, 'getRates'])->name('currency-rates.api');
 });
 
 require __DIR__.'/auth.php';
