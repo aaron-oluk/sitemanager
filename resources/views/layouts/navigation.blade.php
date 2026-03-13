@@ -49,7 +49,7 @@
                         </div>
                     </button>
                     
-                    <div id="dropdown-menu" class="hidden absolute right-0 mt-2 w-48 rounded-sm shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 z-50">
+                    <div id="dropdown-menu" class="hidden absolute right-0 mt-2 w-48 rounded-sm shadow-sm py-1 bg-white ring-1 ring-black ring-opacity-5 z-50">
                         <a href="{{ route('profile.edit') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                             Profile
                         </a>

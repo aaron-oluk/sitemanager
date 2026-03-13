@@ -1,6 +1,8 @@
 @extends('layouts.app')
 
-@section('header')
+@section('content')
+    <header class="bg-white/80 backdrop-blur-sm border-b border-white/20">
+        <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between">
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
                 Dashboard
@@ -20,9 +22,9 @@
                 </a>
             </div>
         </div>
-@endsection
+        </div>
+    </header>
 
-@section('content')
     <div class="py-6">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <!-- Welcome Section -->
@@ -43,7 +45,7 @@
             <!-- Statistics Cards -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <!-- Total Websites -->
-                <div class="bg-white rounded shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-shadow">
+                <div class="bg-white rounded shadow-sm border border-gray-100 p-6 hover:shadow transition-shadow">
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm font-medium text-gray-600">Total Websites</p>
@@ -61,7 +63,7 @@
                 </div>
 
                 <!-- Total Revenue -->
-                <div class="bg-white rounded shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-shadow">
+                <div class="bg-white rounded shadow-sm border border-gray-100 p-6 hover:shadow transition-shadow">
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm font-medium text-gray-600">Total Revenue</p>
@@ -79,7 +81,7 @@
                 </div>
 
                 <!-- Active Domains -->
-                <div class="bg-white rounded shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-shadow">
+                <div class="bg-white rounded shadow-sm border border-gray-100 p-6 hover:shadow transition-shadow">
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm font-medium text-gray-600">Active Domains</p>
@@ -97,7 +99,7 @@
                 </div>
 
                 <!-- Email Accounts -->
-                <div class="bg-white rounded shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-shadow">
+                <div class="bg-white rounded shadow-sm border border-gray-100 p-6 hover:shadow transition-shadow">
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm font-medium text-gray-600">Email Accounts</p>
@@ -117,7 +119,7 @@
 
             <!-- Quick Actions -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div class="bg-white rounded shadow-lg border border-gray-100 p-6">
+                <div class="bg-white rounded shadow-sm border border-gray-100 p-6">
                     <h3 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
                     <div class="space-y-3">
                         <a href="{{ route('websites.create') }}" class="flex items-center p-3 rounded hover:bg-gray-50 transition-colors">
@@ -156,7 +158,7 @@
                 </div>
 
                 <!-- Recent Activity -->
-                <div class="bg-white rounded shadow-lg border border-gray-100 p-6">
+                <div class="bg-white rounded shadow-sm border border-gray-100 p-6">
                     <h3 class="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
                     <div class="space-y-3">
                         @forelse($websites as $website)
@@ -178,7 +180,7 @@
                 </div>
 
                 <!-- Upcoming Renewals -->
-                <div class="bg-white rounded shadow-lg border border-gray-100 p-6">
+                <div class="bg-white rounded shadow-sm border border-gray-100 p-6">
                     <h3 class="text-lg font-semibold text-gray-900 mb-4">Upcoming Renewals</h3>
                     <div class="space-y-3">
                         @forelse($domains->where('expiry_date', '<=', now()->addDays(30)) as $domain)
@@ -203,7 +205,7 @@
             <!-- Main Content Grid -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <!-- Recent Websites -->
-                <div class="bg-white rounded shadow-lg border border-gray-100">
+                <div class="bg-white rounded shadow-sm border border-gray-100">
                     <div class="p-6 border-b border-gray-100">
                         <div class="flex items-center justify-between">
                             <h3 class="text-lg font-semibold text-gray-900">Recent Websites</h3>
@@ -251,7 +253,7 @@
                 </div>
 
                 <!-- Recent Payments -->
-                <div class="bg-white rounded shadow-lg border border-gray-100">
+                <div class="bg-white rounded shadow-sm border border-gray-100">
                     <div class="p-6 border-b border-gray-100">
                         <div class="flex items-center justify-between">
                             <h3 class="text-lg font-semibold text-gray-900">Recent Payments</h3>
@@ -293,7 +295,7 @@
             <!-- Additional Features Section -->
             <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Domain Management -->
-                <div class="bg-white rounded shadow-lg border border-gray-100 p-6">
+                <div class="bg-white rounded shadow-sm border border-gray-100 p-6">
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-lg font-semibold text-gray-900">Domain Management</h3>
                         <a href="{{ route('domains.index') }}" class="text-blue-600 hover:text-blue-800 text-sm font-medium">Manage All</a>
@@ -315,7 +317,7 @@
                 </div>
 
                 <!-- Email Management -->
-                <div class="bg-white rounded shadow-lg border border-gray-100 p-6">
+                <div class="bg-white rounded shadow-sm border border-gray-100 p-6">
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-lg font-semibold text-gray-900">Email Management</h3>
                         <a href="{{ route('emails.index') }}" class="text-blue-600 hover:text-blue-800 text-sm font-medium">Manage All</a>

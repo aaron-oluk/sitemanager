@@ -1,13 +1,15 @@
 @extends('layouts.app')
 
-@section('header')
+@section('content')
+    <header class="bg-white/80 backdrop-blur-sm border-b border-white/20">
+        <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between">
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Domains') }}</h2>
             <a href="{{ route('domains.create') }}" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded text-sm font-medium">Add Domain</a>
         </div>
-@endsection
+        </div>
+    </header>
 
-@section('content')
     <div class="py-6">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             @if(session('success'))

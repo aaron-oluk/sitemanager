@@ -1,10 +1,12 @@
 @extends('layouts.app')
 
-@section('header')
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Edit Website') }}</h2>
-@endsection
-
 @section('content')
+    <header class="bg-white/80 backdrop-blur-sm border-b border-white/20">
+        <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Edit Website') }}</h2>
+        </div>
+    </header>
+
     <div class="py-6">
         <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
             @if($errors->any())

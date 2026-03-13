@@ -7,7 +7,7 @@
         <div class="w-full max-w-md">
             <!-- Logo Section -->
             <div class="text-center mb-8">
-                <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded mb-4 shadow-lg">
+                <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded mb-4 shadow-sm">
                     <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path>
                     </svg>
@@ -17,7 +17,7 @@
             </div>
 
             <!-- Login Card -->
-            <div class="bg-white rounded shadow-md p-8 border border-gray-100">
+            <div class="bg-white rounded shadow-sm p-8 border border-gray-100">
                 <!-- Session Status -->
                 @if (session('status'))
                     <div class="mb-6 p-4 bg-green-50 border border-green-200 text-green-700 rounded-sm text-sm">
@@ -79,7 +79,7 @@
 
                     <!-- Sign In Button -->
                     <button type="submit" 
-                            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded transition-all duration-200 shadow-md hover:shadow-lg">
+                            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded transition-all duration-200 shadow-sm hover:shadow-sm">
                         Sign In
                     </button>
                 </form>

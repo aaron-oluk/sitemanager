@@ -7,7 +7,7 @@
         <div class="w-full max-w-md">
             <!-- Logo Section -->
             <div class="text-center mb-8">
-                <div class="inline-flex items-center justify-center w-16 h-16 bg-green-600 rounded mb-4 shadow-lg">
+                <div class="inline-flex items-center justify-center w-16 h-16 bg-green-600 rounded mb-4 shadow-sm">
                     <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
                     </svg>
@@ -17,7 +17,7 @@
             </div>
 
             <!-- Register Card -->
-            <div class="bg-white rounded shadow-md p-8 border border-gray-100">
+            <div class="bg-white rounded shadow-sm p-8 border border-gray-100">
                 <!-- Register Form -->
                 <form method="POST" action="{{ route('register') }}" class="space-y-5">
                     @csrf
@@ -97,7 +97,7 @@
 
                     <!-- Create Account Button -->
                     <button type="submit" 
-                            class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2.5 px-4 rounded transition-all duration-200 shadow-md hover:shadow-lg">
+                            class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2.5 px-4 rounded transition-all duration-200 shadow-sm hover:shadow-sm">
                         Create Account
                     </button>
                 </form>
