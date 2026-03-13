@@ -1,11 +1,13 @@
-<x-app-layout>
-    <x-slot name="header">
+@extends('layouts.app')
+
+@section('header')
         <div class="flex items-center justify-between">
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Payment Details') }}</h2>
             <a href="{{ route('payments.edit', $payment) }}" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium">Edit</a>
         </div>
-    </x-slot>
+@endsection
 
+@section('content')
     <div class="py-6">
         <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="bg-white rounded-2xl shadow border border-gray-100 p-6">
@@ -54,6 +56,6 @@
             </div>
         </div>
     </div>
-</x-app-layout>
+@endsection
 
 
