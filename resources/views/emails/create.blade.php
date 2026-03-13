@@ -25,11 +25,11 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Email Address</label>
-                        <input name="email_address" value="{{ old('email_address') }}" required class="mt-1 w-full rounded-sm border-gray-300 focus:ring-2 focus:ring-blue-500" placeholder="user@domain.com" />
+                        <input name="email_address" value="{{ old('email_address') }}" required class="mt-1 w-full rounded-md border-gray-300 focus:ring-2 focus:ring-blue-500" placeholder="user@domain.com" />
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Domain (Auto-detected)</label>
-                        <select name="domain_id" class="mt-1 w-full rounded-sm border-gray-300 focus:ring-2 focus:ring-blue-500">
+                        <select name="domain_id" class="mt-1 w-full rounded-md border-gray-300 focus:ring-2 focus:ring-blue-500">
                             <option value="">-- Auto-detect from email --</option>
                             @foreach($domains as $id => $domainName)
                                 <option value="{{ $id }}" {{ old('domain_id') == $id ? 'selected' : '' }}>{{ $domainName }}</option>
@@ -39,11 +39,11 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Provider</label>
-                        <input name="provider" value="{{ old('provider') }}" required class="mt-1 w-full rounded-sm border-gray-300 focus:ring-2 focus:ring-blue-500" />
+                        <input name="provider" value="{{ old('provider') }}" required class="mt-1 w-full rounded-md border-gray-300 focus:ring-2 focus:ring-blue-500" />
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Hosting Plan</label>
-                        <select name="hosting_plan" class="mt-1 w-full rounded-sm border-gray-300 focus:ring-2 focus:ring-blue-500">
+                        <select name="hosting_plan" class="mt-1 w-full rounded-md border-gray-300 focus:ring-2 focus:ring-blue-500">
                             @foreach(['monthly' => 'Monthly', 'quarterly' => 'Quarterly', 'biannual' => 'Bi-Annual', 'annual' => 'Annual', 'biennial' => 'Bi-Annual (2 Years)', 'triennial' => 'Tri-Annual (3 Years)'] as $value => $label)
                                 <option value="{{ $value }}" {{ old('hosting_plan') == $value ? 'selected' : '' }}>{{ $label }}</option>
                             @endforeach
@@ -51,11 +51,11 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Monthly Cost</label>
-                        <input type="number" step="0.01" name="monthly_cost" value="{{ old('monthly_cost') }}" required class="mt-1 w-full rounded-sm border-gray-300 focus:ring-2 focus:ring-blue-500" />
+                        <input type="number" step="0.01" name="monthly_cost" value="{{ old('monthly_cost') }}" required class="mt-1 w-full rounded-md border-gray-300 focus:ring-2 focus:ring-blue-500" />
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Associated Website (Optional)</label>
-                        <select name="associated_website" class="mt-1 w-full rounded-sm border-gray-300 focus:ring-2 focus:ring-blue-500">
+                        <select name="associated_website" class="mt-1 w-full rounded-md border-gray-300 focus:ring-2 focus:ring-blue-500">
                             <option value="">-- No website association --</option>
                             @foreach($websites as $id => $websiteName)
                                 <option value="{{ $id }}" {{ old('associated_website') == $id ? 'selected' : '' }}>{{ $websiteName }}</option>
@@ -64,15 +64,15 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Start Date</label>
-                        <input type="date" name="start_date" value="{{ old('start_date') }}" required class="mt-1 w-full rounded-sm border-gray-300 focus:ring-2 focus:ring-blue-500" />
+                        <input type="date" name="start_date" value="{{ old('start_date') }}" required class="mt-1 w-full rounded-md border-gray-300 focus:ring-2 focus:ring-blue-500" />
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Renewal Date</label>
-                        <input type="date" name="renewal_date" value="{{ old('renewal_date') }}" required class="mt-1 w-full rounded-sm border-gray-300 focus:ring-2 focus:ring-blue-500" />
+                        <input type="date" name="renewal_date" value="{{ old('renewal_date') }}" required class="mt-1 w-full rounded-md border-gray-300 focus:ring-2 focus:ring-blue-500" />
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Status</label>
-                        <select name="status" class="mt-1 w-full rounded-sm border-gray-300 focus:ring-2 focus:ring-blue-500">
+                        <select name="status" class="mt-1 w-full rounded-md border-gray-300 focus:ring-2 focus:ring-blue-500">
                             @foreach(['active' => 'Active', 'inactive' => 'Inactive', 'suspended' => 'Suspended', 'pending' => 'Pending', 'cancelled' => 'Cancelled'] as $value => $label)
                                 <option value="{{ $value }}" {{ old('status') == $value ? 'selected' : '' }}>{{ $label }}</option>
                             @endforeach
@@ -82,7 +82,7 @@
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Notes</label>
-                    <textarea name="notes" rows="4" class="mt-1 w-full rounded-sm border-gray-300 focus:ring-2 focus:ring-blue-500">{{ old('notes') }}</textarea>
+                    <textarea name="notes" rows="4" class="mt-1 w-full rounded-md border-gray-300 focus:ring-2 focus:ring-blue-500">{{ old('notes') }}</textarea>
                 </div>
 
                 <div class="flex items-center justify-end gap-3">

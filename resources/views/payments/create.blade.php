@@ -25,7 +25,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Website</label>
-                        <select name="website_id" class="mt-1 w-full rounded-sm border-gray-300 focus:ring-2 focus:ring-blue-500">
+                        <select name="website_id" class="mt-1 w-full rounded-md border-gray-300 focus:ring-2 focus:ring-blue-500">
                             @foreach($websites as $id => $name)
                                 <option value="{{ $id }}" {{ old('website_id')==$id?'selected':'' }}>{{ $name }}</option>
                             @endforeach
@@ -33,15 +33,15 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Payment Method</label>
-                        <input name="payment_method" value="{{ old('payment_method') }}" required class="mt-1 w-full rounded-sm border-gray-300 focus:ring-2 focus:ring-blue-500" />
+                        <input name="payment_method" value="{{ old('payment_method') }}" required class="mt-1 w-full rounded-md border-gray-300 focus:ring-2 focus:ring-blue-500" />
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Amount</label>
-                        <input type="number" step="0.01" name="amount" id="amount" value="{{ old('amount') }}" required class="mt-1 w-full rounded-sm border-gray-300 focus:ring-2 focus:ring-blue-500" />
+                        <input type="number" step="0.01" name="amount" id="amount" value="{{ old('amount') }}" required class="mt-1 w-full rounded-md border-gray-300 focus:ring-2 focus:ring-blue-500" />
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Currency</label>
-                        <select name="currency" id="currency" class="mt-1 w-full rounded-sm border-gray-300 focus:ring-2 focus:ring-blue-500">
+                        <select name="currency" id="currency" class="mt-1 w-full rounded-md border-gray-300 focus:ring-2 focus:ring-blue-500">
                             @foreach($currencies as $currency)
                                 <option value="{{ $currency }}" {{ old('currency')==$currency?'selected':'' }}>{{ $currency }}</option>
                             @endforeach
@@ -49,21 +49,21 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700">USD Equivalent</label>
-                        <div class="mt-1 p-3 bg-gray-50 rounded-sm text-sm text-gray-600" id="usd-equivalent">
+                        <div class="mt-1 p-3 bg-gray-50 rounded-md text-sm text-gray-600" id="usd-equivalent">
                             $0.00
                         </div>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Transaction ID (optional)</label>
-                        <input name="transaction_id" value="{{ old('transaction_id') }}" class="mt-1 w-full rounded-sm border-gray-300 focus:ring-2 focus:ring-blue-500" />
+                        <input name="transaction_id" value="{{ old('transaction_id') }}" class="mt-1 w-full rounded-md border-gray-300 focus:ring-2 focus:ring-blue-500" />
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Payment Date</label>
-                        <input type="date" name="payment_date" value="{{ old('payment_date') }}" required class="mt-1 w-full rounded-sm border-gray-300 focus:ring-2 focus:ring-blue-500" />
+                        <input type="date" name="payment_date" value="{{ old('payment_date') }}" required class="mt-1 w-full rounded-md border-gray-300 focus:ring-2 focus:ring-blue-500" />
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Status</label>
-                        <select name="status" class="mt-1 w-full rounded-sm border-gray-300 focus:ring-2 focus:ring-blue-500">
+                        <select name="status" class="mt-1 w-full rounded-md border-gray-300 focus:ring-2 focus:ring-blue-500">
                             @foreach(['completed','pending','failed'] as $status)
                                 <option value="{{ $status }}" {{ old('status')===$status?'selected':'' }}>{{ ucfirst($status) }}</option>
                             @endforeach
@@ -73,7 +73,7 @@
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Notes</label>
-                    <textarea name="notes" rows="4" class="mt-1 w-full rounded-sm border-gray-300 focus:ring-2 focus:ring-blue-500">{{ old('notes') }}</textarea>
+                    <textarea name="notes" rows="4" class="mt-1 w-full rounded-md border-gray-300 focus:ring-2 focus:ring-blue-500">{{ old('notes') }}</textarea>
                 </div>
 
                 <div class="flex items-center justify-end gap-3">

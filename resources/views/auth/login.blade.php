@@ -20,7 +20,7 @@
             <div class="bg-white rounded shadow-sm p-8 border border-gray-100">
                 <!-- Session Status -->
                 @if (session('status'))
-                    <div class="mb-6 p-4 bg-green-50 border border-green-200 text-green-700 rounded-sm text-sm">
+                    <div class="mb-6 p-4 bg-green-50 border border-green-200 text-green-700 rounded-md text-sm">
                         {{ session('status') }}
                     </div>
                 @endif
