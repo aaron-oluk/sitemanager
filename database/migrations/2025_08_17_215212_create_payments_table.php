@@ -15,6 +15,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('website_id')->constrained()->onDelete('cascade');
             $table->decimal('amount', 10, 2);
+            $table->string('currency', 3)->default('USD');
+            $table->decimal('usd_equivalent', 10, 2)->nullable();
             $table->string('payment_method');
             $table->string('transaction_id')->nullable();
             $table->date('payment_date');

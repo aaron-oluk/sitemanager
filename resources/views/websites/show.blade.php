@@ -64,6 +64,10 @@
                         <dd class="mt-1 text-gray-900 font-medium">{{ $website->formatted_amount }}</dd>
                     </div>
                     <div>
+                        <dt class="text-sm text-gray-500">Amount Includes Domain</dt>
+                        <dd class="mt-1 text-gray-900 font-medium">{{ $website->amount_includes_domain ? 'Yes' : 'No' }}</dd>
+                    </div>
+                    <div>
                         <dt class="text-sm text-gray-500">Domain Purchased</dt>
                         <dd class="mt-1 text-gray-900 font-medium">{{ $website->domain_purchased ? 'Yes' : 'No (Using existing domain)' }}</dd>
                     </div>

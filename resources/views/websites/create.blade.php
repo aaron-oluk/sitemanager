@@ -75,7 +75,14 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Amount Paid</label>
-                        <input type="number" step="0.01" name="amount_paid" value="{{ old('amount_paid') }}" required class="mt-1 w-full rounded-md border-gray-300 focus:ring-2 focus:ring-blue-500" />
+                        <input id="amount_paid" type="number" step="0.01" name="amount_paid" value="{{ old('amount_paid') }}" required class="mt-1 w-full rounded-md border-gray-300 focus:ring-2 focus:ring-blue-500" />
+                    </div>
+                    <div class="md:col-span-2">
+                        <input type="hidden" name="amount_includes_domain" value="0">
+                        <label class="inline-flex items-center gap-2 text-sm font-medium text-gray-700 mt-6">
+                            <input type="checkbox" name="amount_includes_domain" value="1" {{ old('amount_includes_domain') ? 'checked' : '' }} class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                            Amount Paid already includes domain cost
+                        </label>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Currency</label>

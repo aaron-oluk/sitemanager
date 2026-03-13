@@ -48,6 +48,7 @@ class WebsiteController extends Controller
             'host_server' => 'required|string|max:255',
             'deployment_date' => 'required|date',
             'amount_paid' => 'required|numeric|min:0',
+            'amount_includes_domain' => 'nullable|boolean',
             'currency' => 'required|string|in:' . implode(',', app(\App\Services\CurrencyService::class)->getAvailableCurrencies()),
             'status' => 'required|in:active,inactive,maintenance',
             'description' => 'nullable|string',
@@ -64,6 +65,7 @@ class WebsiteController extends Controller
         $validated['deployment_date'] = Carbon::parse($validated['deployment_date']);
 
         $validated['domain_purchased'] = $request->boolean('domain_purchased');
+        $validated['amount_includes_domain'] = $request->boolean('amount_includes_domain');
         $domainCost = $this->calculateDomainCostBreakdown(
             $validated['domain_purchased'] ? (float) ($validated['domain_base_cost'] ?? 0) : 0
         );
@@ -150,6 +152,7 @@ class WebsiteController extends Controller
             'host_server' => 'required|string|max:255',
             'deployment_date' => 'required|date',
             'amount_paid' => 'required|numeric|min:0',
+            'amount_includes_domain' => 'nullable|boolean',
             'currency' => 'required|string|in:' . implode(',', app(\App\Services\CurrencyService::class)->getAvailableCurrencies()),
             'status' => 'required|in:active,inactive,maintenance',
             'description' => 'nullable|string',
@@ -158,6 +161,7 @@ class WebsiteController extends Controller
         ]);
 
         $validated['domain_purchased'] = $request->boolean('domain_purchased');
+        $validated['amount_includes_domain'] = $request->boolean('amount_includes_domain');
         $domainCost = $this->calculateDomainCostBreakdown(
             $validated['domain_purchased'] ? (float) ($validated['domain_base_cost'] ?? 0) : 0
         );

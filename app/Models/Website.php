@@ -15,6 +15,7 @@ class Website extends Model
         'host_server',
         'deployment_date',
         'amount_paid',
+        'amount_includes_domain',
         'currency',
         'status',
         'description',
@@ -31,6 +32,7 @@ class Website extends Model
     protected $casts = [
         'deployment_date' => 'date',
         'amount_paid' => 'decimal:2',
+        'amount_includes_domain' => 'boolean',
         'domain_purchased' => 'boolean',
         'domain_base_cost' => 'decimal:2',
         'domain_tax_amount' => 'decimal:2',

@@ -22,6 +22,7 @@ return new class extends Migration
             $table->string('status')->default('active'); // active, suspended, cancelled
             $table->text('notes')->nullable();
             $table->string('associated_website')->nullable(); // Link to website if applicable
+            $table->foreignId('domain_id')->nullable()->constrained()->onDelete('set null');
             $table->timestamps();
         });
     }
