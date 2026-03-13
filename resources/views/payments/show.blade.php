@@ -3,14 +3,14 @@
 @section('header')
         <div class="flex items-center justify-between">
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Payment Details') }}</h2>
-            <a href="{{ route('payments.edit', $payment) }}" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium">Edit</a>
+            <a href="{{ route('payments.edit', $payment) }}" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded text-sm font-medium">Edit</a>
         </div>
 @endsection
 
 @section('content')
     <div class="py-6">
         <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="bg-white rounded-2xl shadow border border-gray-100 p-6">
+            <div class="bg-white rounded shadow border border-gray-100 p-6">
                 <dl class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <dt class="text-sm text-gray-500">Website</dt>

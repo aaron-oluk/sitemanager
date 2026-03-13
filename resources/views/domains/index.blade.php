@@ -3,7 +3,7 @@
 @section('header')
         <div class="flex items-center justify-between">
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Domains') }}</h2>
-            <a href="{{ route('domains.create') }}" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-medium">Add Domain</a>
+            <a href="{{ route('domains.create') }}" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded text-sm font-medium">Add Domain</a>
         </div>
 @endsection
 
@@ -11,10 +11,10 @@
     <div class="py-6">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             @if(session('success'))
-                <div class="mb-4 p-3 rounded-lg bg-green-50 text-green-700 border border-green-200">{{ session('success') }}</div>
+                <div class="mb-4 p-3 rounded bg-green-50 text-green-700 border border-green-200">{{ session('success') }}</div>
             @endif
 
-            <div class="bg-white rounded-2xl shadow border border-gray-100 overflow-hidden">
+            <div class="bg-white rounded shadow border border-gray-100 overflow-hidden">
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">

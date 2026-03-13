@@ -3,7 +3,7 @@
 @section('header')
         <div class="flex items-center justify-between">
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Email Management') }}</h2>
-            <a href="{{ route('emails.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium">Add Email</a>
+            <a href="{{ route('emails.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-medium">Add Email</a>
         </div>
 @endsection
 
@@ -11,20 +11,20 @@
     <div class="py-6">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             @if(session('success'))
-                <div class="mb-4 p-3 rounded-lg bg-green-50 text-green-700 border border-green-200">{{ session('success') }}</div>
+                <div class="mb-4 p-3 rounded bg-green-50 text-green-700 border border-green-200">{{ session('success') }}</div>
             @endif
 
             <!-- Statistics Cards -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <div class="bg-white rounded-2xl shadow border border-gray-100 p-4">
+                <div class="bg-white rounded shadow border border-gray-100 p-4">
                     <p class="text-sm text-gray-600">Total Emails</p>
                     <p class="text-2xl font-bold text-gray-900">{{ $totalEmails }}</p>
                 </div>
-                <div class="bg-white rounded-2xl shadow border border-gray-100 p-4">
+                <div class="bg-white rounded shadow border border-gray-100 p-4">
                     <p class="text-sm text-gray-600">Monthly Cost</p>
                     <p class="text-2xl font-bold text-gray-900">${{ number_format($totalMonthlyCost, 2) }}</p>
                 </div>
-                <div class="bg-white rounded-2xl shadow border border-gray-100 p-4">
+                <div class="bg-white rounded shadow border border-gray-100 p-4">
                     <p class="text-sm text-gray-600">Active</p>
                     <p class="text-2xl font-bold text-gray-900">{{ $activeEmails }}</p>
                 </div>
@@ -33,7 +33,7 @@
             <!-- Emails Clustered by Domain -->
             <div class="space-y-6">
                 @foreach($emailsByDomain as $domainId => $cluster)
-                    <div class="bg-white rounded-2xl shadow border border-gray-100 overflow-hidden">
+                    <div class="bg-white rounded shadow border border-gray-100 overflow-hidden">
                         <div class="p-6 border-b border-gray-100">
                             <div class="flex items-center justify-between">
                                 <div>

@@ -3,14 +3,14 @@
 @section('header')
         <div class="flex items-center justify-between">
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ $domain->domain_name }}</h2>
-            <a href="{{ route('domains.edit', $domain) }}" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium">Edit</a>
+            <a href="{{ route('domains.edit', $domain) }}" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded text-sm font-medium">Edit</a>
         </div>
 @endsection
 
 @section('content')
     <div class="py-6">
         <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="bg-white rounded-2xl shadow border border-gray-100 p-6">
+            <div class="bg-white rounded shadow border border-gray-100 p-6">
                 <dl class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <dt class="text-sm text-gray-500">Domain Name</dt>
@@ -48,7 +48,7 @@
                 </dl>
 
                 @if($domain->website)
-                <div class="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <div class="mt-6 p-4 bg-blue-50 rounded border border-blue-200">
                     <h3 class="text-sm font-medium text-blue-900 mb-2">Linked Website</h3>
                     <div class="flex items-center justify-between">
                         <div>
@@ -67,7 +67,7 @@
                     <h3 class="text-lg font-semibold text-gray-900 mb-4">All Linked Websites</h3>
                     <div class="space-y-3">
                         @foreach($domain->websites as $website)
-                        <div class="flex items-center justify-between p-3 rounded-lg bg-gray-50">
+                        <div class="flex items-center justify-between p-3 rounded bg-gray-50">
                             <div>
                                 <p class="font-medium text-gray-900">{{ $website->name }}</p>
                                 <p class="text-sm text-gray-600">{{ $website->client_name }}</p>
