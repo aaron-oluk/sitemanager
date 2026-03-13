@@ -67,10 +67,10 @@
                     Track deployments, manage payments, handle domains, and organize email accounts all in one place.
                 </p>
                 <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                    <a href="{{ route('register') }}" class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-4 rounded-md text-lg font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-sm hover:shadow transform hover:-translate-y-1">
+                    <a href="{{ route('register') }}" class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-5 py-2 rounded-md text-sm font-medium hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-sm hover:shadow transform hover:-translate-y-1">
                         Start Free Trial
                     </a>
-                    <a href="#demo" class="border-2 border-gray-300 text-gray-700 px-8 py-4 rounded-md text-lg font-semibold hover:border-blue-600 hover:text-blue-600 transition-all duration-200">
+                    <a href="#demo" class="border-2 border-gray-300 text-gray-700 px-5 py-2 rounded-md text-sm font-medium hover:border-blue-600 hover:text-blue-600 transition-all duration-200">
                         Watch Demo
                     </a>
                 </div>
@@ -177,10 +177,10 @@
                 Join thousands of developers and agencies who trust SiteManager to organize their projects and grow their business.
             </p>
             <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <a href="{{ route('register') }}" class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-4 rounded-md text-lg font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-sm hover:shadow">
+                <a href="{{ route('register') }}" class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-5 py-2 rounded-md text-sm font-medium hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-sm hover:shadow">
                     Start Your Free Trial
                 </a>
-                <a href="{{ route('login') }}" class="border-2 border-gray-300 text-gray-700 px-8 py-4 rounded-md text-lg font-semibold hover:border-blue-600 hover:text-blue-600 transition-all duration-200">
+                <a href="{{ route('login') }}" class="border-2 border-gray-300 text-gray-700 px-5 py-2 rounded-md text-sm font-medium hover:border-blue-600 hover:text-blue-600 transition-all duration-200">
                     Sign In to Existing Account
                 </a>
             </div>

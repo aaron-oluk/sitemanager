@@ -15,7 +15,7 @@
                 <p class="text-gray-600 text-sm">Secure area — please verify your identity</p>
             </div>
 
-            <div class="bg-white rounded shadow-sm p-8 border border-gray-100">
+            <div class="bg-white rounded-md shadow-sm p-8 border border-gray-100">
                 <p class="mb-6 text-sm text-gray-600">{{ __('This is a secure area of the application. Please confirm your password before continuing.') }}</p>
 
                 <form method="POST" action="{{ route('password.confirm') }}" class="space-y-5">
@@ -31,7 +31,7 @@
                         @enderror
                     </div>
 
-                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded transition-colors">
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded transition-colors">
                         {{ __('Confirm') }}
                     </button>
                 </form>

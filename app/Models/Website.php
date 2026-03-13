@@ -21,11 +21,21 @@ class Website extends Model
         'client_name',
         'client_email',
         'domain_id', // Add domain relationship
+        'domain_purchased',
+        'domain_base_cost',
+        'domain_tax_amount',
+        'domain_transaction_fee',
+        'domain_total_cost',
     ];
 
     protected $casts = [
         'deployment_date' => 'date',
         'amount_paid' => 'decimal:2',
+        'domain_purchased' => 'boolean',
+        'domain_base_cost' => 'decimal:2',
+        'domain_tax_amount' => 'decimal:2',
+        'domain_transaction_fee' => 'decimal:2',
+        'domain_total_cost' => 'decimal:2',
     ];
 
     public function payments()
@@ -124,6 +134,26 @@ class Website extends Model
     public function getFormattedUsdEquivalentAttribute(): string
     {
         return '$' . number_format($this->usd_equivalent, 2);
+    }
+
+    public function getFormattedDomainBaseCostAttribute(): string
+    {
+        return '$' . number_format((float) $this->domain_base_cost, 2);
+    }
+
+    public function getFormattedDomainTaxAmountAttribute(): string
+    {
+        return '$' . number_format((float) $this->domain_tax_amount, 2);
+    }
+
+    public function getFormattedDomainTransactionFeeAttribute(): string
+    {
+        return '$' . number_format((float) $this->domain_transaction_fee, 2);
+    }
+
+    public function getFormattedDomainTotalCostAttribute(): string
+    {
+        return '$' . number_format((float) $this->domain_total_cost, 2);
     }
 
     /**

@@ -17,7 +17,7 @@
             </div>
 
             <!-- Login Card -->
-            <div class="bg-white rounded shadow-sm p-8 border border-gray-100">
+            <div class="bg-white rounded-md shadow-sm p-8 border border-gray-100">
                 <!-- Session Status -->
                 @if (session('status'))
                     <div class="mb-6 p-4 bg-green-50 border border-green-200 text-green-700 rounded-md text-sm">
@@ -79,7 +79,7 @@
 
                     <!-- Sign In Button -->
                     <button type="submit" 
-                            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded transition-all duration-200 shadow-sm hover:shadow-sm">
+                            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded transition-all duration-200 shadow-sm hover:shadow-sm">
                         Sign In
                     </button>
                 </form>
@@ -96,7 +96,7 @@
 
                 <!-- Sign Up Link -->
                 <a href="{{ route('register') }}" 
-                   class="block w-full text-center bg-gray-50 hover:bg-gray-100 text-gray-700 font-semibold py-2.5 px-4 rounded border-2 border-gray-200 hover:border-gray-300 transition-all">
+                   class="block w-full text-center bg-gray-50 hover:bg-gray-100 text-gray-700 font-semibold py-2 px-4 rounded border-2 border-gray-200 hover:border-gray-300 transition-all">
                     Create an Account
                 </a>
             </div>

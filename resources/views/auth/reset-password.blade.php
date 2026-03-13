@@ -15,7 +15,7 @@
                 <p class="text-gray-600 text-sm">Choose a new password</p>
             </div>
 
-            <div class="bg-white rounded shadow-sm p-8 border border-gray-100">
+            <div class="bg-white rounded-md shadow-sm p-8 border border-gray-100">
                 <form method="POST" action="{{ route('password.store') }}" class="space-y-5">
                     @csrf
                     <input type="hidden" name="token" value="{{ $request->route('token') }}">
@@ -50,7 +50,7 @@
                         @enderror
                     </div>
 
-                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded transition-colors">
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded transition-colors">
                         {{ __('Reset Password') }}
                     </button>
                 </form>

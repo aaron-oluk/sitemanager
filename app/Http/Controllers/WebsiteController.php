@@ -43,6 +43,8 @@ class WebsiteController extends Controller
             'name' => 'required|string|max:255',
             'domain' => 'required|string|max:255',
             'domain_id' => 'nullable|exists:domains,id',
+            'domain_purchased' => 'nullable|boolean',
+            'domain_base_cost' => 'nullable|numeric|min:0|required_if:domain_purchased,1',
             'host_server' => 'required|string|max:255',
             'deployment_date' => 'required|date',
             'amount_paid' => 'required|numeric|min:0',
@@ -60,6 +62,14 @@ class WebsiteController extends Controller
 
         // Ensure deployment_date is a Carbon instance
         $validated['deployment_date'] = Carbon::parse($validated['deployment_date']);
+
+        $validated['domain_purchased'] = $request->boolean('domain_purchased');
+        $domainCost = $this->calculateDomainCostBreakdown(
+            $validated['domain_purchased'] ? (float) ($validated['domain_base_cost'] ?? 0) : 0
+        );
+        $validated = array_merge($validated, $domainCost);
+
+        $domain = null;
 
         // If domain_id is provided, link to existing domain
         // If not, create a new domain record
@@ -122,7 +132,8 @@ class WebsiteController extends Controller
     public function edit(Website $website): View
     {
         $domains = Domain::orderBy('domain_name')->pluck('domain_name', 'id');
-        return view('websites.edit', compact('website', 'domains'));
+        $currencies = app(\App\Services\CurrencyService::class)->getAvailableCurrencies();
+        return view('websites.edit', compact('website', 'domains', 'currencies'));
     }
 
     /**
@@ -134,14 +145,23 @@ class WebsiteController extends Controller
             'name' => 'required|string|max:255',
             'domain' => 'required|string|max:255',
             'domain_id' => 'nullable|exists:domains,id',
+            'domain_purchased' => 'nullable|boolean',
+            'domain_base_cost' => 'nullable|numeric|min:0|required_if:domain_purchased,1',
             'host_server' => 'required|string|max:255',
             'deployment_date' => 'required|date',
             'amount_paid' => 'required|numeric|min:0',
+            'currency' => 'required|string|in:' . implode(',', app(\App\Services\CurrencyService::class)->getAvailableCurrencies()),
             'status' => 'required|in:active,inactive,maintenance',
             'description' => 'nullable|string',
             'client_name' => 'required|string|max:255',
             'client_email' => 'required|email|max:255',
         ]);
+
+        $validated['domain_purchased'] = $request->boolean('domain_purchased');
+        $domainCost = $this->calculateDomainCostBreakdown(
+            $validated['domain_purchased'] ? (float) ($validated['domain_base_cost'] ?? 0) : 0
+        );
+        $validated = array_merge($validated, $domainCost);
 
         // Handle domain relationship
         if (!empty($validated['domain_id'])) {
@@ -161,6 +181,29 @@ class WebsiteController extends Controller
         $website->update($validated);
 
         return redirect()->route('websites.index')->with('success', 'Website updated successfully!');
+    }
+
+    private function calculateDomainCostBreakdown(float $baseCost): array
+    {
+        if ($baseCost <= 0) {
+            return [
+                'domain_base_cost' => 0,
+                'domain_tax_amount' => 0,
+                'domain_transaction_fee' => 0,
+                'domain_total_cost' => 0,
+            ];
+        }
+
+        $taxAmount = $baseCost * 0.18;
+        $transactionFee = $baseCost * 0.025;
+        $totalWithCharges = ceil($baseCost + $taxAmount + $transactionFee);
+
+        return [
+            'domain_base_cost' => round($baseCost, 2),
+            'domain_tax_amount' => round($taxAmount, 2),
+            'domain_transaction_fee' => round($transactionFee, 2),
+            'domain_total_cost' => round($totalWithCharges, 2),
+        ];
     }
 
     public function destroy(Website $website): RedirectResponse

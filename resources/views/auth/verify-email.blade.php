@@ -15,7 +15,7 @@
                 <p class="text-gray-600 text-sm">Check your inbox to continue</p>
             </div>
 
-            <div class="bg-white rounded shadow-sm p-8 border border-gray-100">
+            <div class="bg-white rounded-md shadow-sm p-8 border border-gray-100">
                 <p class="mb-6 text-sm text-gray-600">{{ __('Thanks for signing up! Before getting started, could you verify your email address by clicking on the link we just emailed to you? If you didn\'t receive the email, we will gladly send you another.') }}</p>
 
                 @if (session('status') == 'verification-link-sent')

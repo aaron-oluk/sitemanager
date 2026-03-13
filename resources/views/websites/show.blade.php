@@ -64,6 +64,28 @@
                         <dd class="mt-1 text-gray-900 font-medium">{{ $website->formatted_amount }}</dd>
                     </div>
                     <div>
+                        <dt class="text-sm text-gray-500">Domain Purchased</dt>
+                        <dd class="mt-1 text-gray-900 font-medium">{{ $website->domain_purchased ? 'Yes' : 'No (Using existing domain)' }}</dd>
+                    </div>
+                    @if($website->domain_purchased)
+                    <div>
+                        <dt class="text-sm text-gray-500">Domain Base Cost</dt>
+                        <dd class="mt-1 text-gray-900 font-medium">{{ $website->formatted_domain_base_cost }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm text-gray-500">Domain Tax (18%)</dt>
+                        <dd class="mt-1 text-gray-900 font-medium">{{ $website->formatted_domain_tax_amount }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm text-gray-500">Transaction Fee (2.5%)</dt>
+                        <dd class="mt-1 text-gray-900 font-medium">{{ $website->formatted_domain_transaction_fee }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm text-gray-500">Domain Total Cost</dt>
+                        <dd class="mt-1 text-gray-900 font-semibold">{{ $website->formatted_domain_total_cost }}</dd>
+                    </div>
+                    @endif
+                    <div>
                         <dt class="text-sm text-gray-500">Currency</dt>
                         <dd class="mt-1 text-gray-900 font-medium">{{ $website->currency }}</dd>
                     </div>
