@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'SiteManager') }}</title>
+        <title>@yield('title', config('app.name', 'SiteManager'))</title>
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
@@ -13,24 +13,28 @@
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+        
+        @yield('styles')
     </head>
     <body class="font-sans antialiased">
         <div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
             @include('layouts.navigation')
 
             <!-- Page Heading -->
-            @isset($header)
+            @hasSection('header')
                 <header class="bg-white/80 backdrop-blur-sm border-b border-white/20 shadow-lg">
                     <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                        {{ $header }}
+                        @yield('header')
                     </div>
                 </header>
-            @endisset
+            @endif
 
             <!-- Page Content -->
             <main>
-                {{ $slot }}
+                @yield('content')
             </main>
         </div>
+        
+        @yield('scripts')
     </body>
 </html>
