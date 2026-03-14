@@ -17,7 +17,6 @@ class Domain extends Model
         'annual_cost',
         'status',
         'notes',
-        'website_id', // Add website relationship
     ];
 
     protected $casts = [

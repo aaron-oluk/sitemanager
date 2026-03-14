@@ -39,11 +39,11 @@
                         <dd class="mt-1"><span class="px-2 py-1 rounded-full text-xs {{ $email->status === 'active' ? 'bg-green-100 text-green-700' : ($email->status === 'suspended' ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-700') }}">{{ ucfirst($email->status) }}</span></dd>
                     </div>
                 </dl>
-                @if($email->associated_website || $email->notes)
+                @if($email->website || $email->notes)
                     <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <dt class="text-sm text-gray-500">Associated Website</dt>
-                            <dd class="mt-1 text-gray-900">{{ $email->associated_website ?? '-' }}</dd>
+                            <dd class="mt-1 text-gray-900">{{ $email->website->name ?? '-' }}</dd>
                         </div>
                         <div>
                             <dt class="text-sm text-gray-500">Notes</dt>

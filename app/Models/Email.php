@@ -18,7 +18,7 @@ class Email extends Model
         'renewal_date',
         'status',
         'notes',
-        'associated_website',
+        'website_id',
         'domain_id',
     ];
 
@@ -41,7 +41,7 @@ class Email extends Model
      */
     public function website()
     {
-        return $this->belongsTo(Website::class, 'associated_website');
+        return $this->belongsTo(Website::class);
     }
 
     /**

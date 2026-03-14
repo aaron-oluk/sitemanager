@@ -21,7 +21,7 @@
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Website</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Source</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Method</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
@@ -33,7 +33,15 @@
                         <tbody class="bg-white divide-y divide-gray-100">
                             @forelse ($payments as $payment)
                                 <tr>
-                                    <td class="px-4 py-3 text-sm text-gray-900 font-medium">{{ $payment->website->name ?? 'N/A' }}</td>
+                                    <td class="px-4 py-3 text-sm text-gray-900 font-medium">
+                                        @if($payment->payment_type === 'domain')
+                                            <span class="text-xs text-purple-600 font-normal">Domain</span><br>
+                                            {{ $payment->domain->domain_name ?? 'N/A' }}
+                                        @else
+                                            <span class="text-xs text-blue-600 font-normal">Website</span><br>
+                                            {{ $payment->website->name ?? 'N/A' }}
+                                        @endif
+                                    </td>
                                     <td class="px-4 py-3 text-sm text-gray-700">{{ $payment->payment_method }}</td>
                                     <td class="px-4 py-3 text-sm text-gray-700">{{ optional($payment->payment_date)->format('M d, Y') }}</td>
                                     <td class="px-4 py-3 text-sm text-gray-900 font-semibold">

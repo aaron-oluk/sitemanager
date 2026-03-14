@@ -122,6 +122,25 @@ class WebsiteController extends Controller
             }
         }
 
+        if ($website->amount_paid > 0) {
+            $usdEquivalent = app(\App\Services\CurrencyService::class)->toUSD(
+                (float) $website->amount_paid,
+                $website->currency
+            );
+            Payment::create([
+                'website_id'     => $website->id,
+                'payment_type'   => 'website',
+                'amount'         => $website->amount_paid,
+                'currency'       => $website->currency,
+                'usd_equivalent' => $usdEquivalent,
+                'payment_method' => 'Auto-recorded',
+                'payment_date'   => $website->deployment_date,
+                'status'         => 'completed',
+                'notes'          => 'Website: ' . $website->name,
+                'receipt_number' => 'RCT-' . strtoupper(uniqid()),
+            ]);
+        }
+
         return redirect()->route('websites.index')->with('success', 'Website created successfully!');
     }
 

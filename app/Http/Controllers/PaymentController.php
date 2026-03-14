@@ -24,7 +24,7 @@ class PaymentController extends Controller
      */
     public function index(): View
     {
-        $payments = Payment::with('website')->latest()->paginate(15);
+        $payments = Payment::with(['website', 'domain'])->latest()->paginate(15);
         return view('payments.index', compact('payments'));
     }
 

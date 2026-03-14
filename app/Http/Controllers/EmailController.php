@@ -68,9 +68,9 @@ class EmailController extends Controller
             'monthly_cost' => 'required|numeric|min:0',
             'start_date' => 'required|date',
             'renewal_date' => 'required|date|after:start_date',
-            'status' => 'required|in:active,inactive,suspended',
+            'status' => 'required|in:active,inactive,suspended,pending,cancelled',
             'notes' => 'nullable|string',
-            'associated_website' => 'nullable|exists:websites,id',
+            'website_id' => 'nullable|exists:websites,id',
             'domain_id' => 'nullable|exists:domains,id',
         ]);
 
@@ -113,7 +113,7 @@ class EmailController extends Controller
             'renewal_date' => 'required|date|after:start_date',
             'status' => 'required|in:active,inactive,suspended,pending,cancelled',
             'notes' => 'nullable|string',
-            'associated_website' => 'nullable|exists:websites,id',
+            'website_id' => 'nullable|exists:websites,id',
             'domain_id' => 'nullable|exists:domains,id',
         ]);
 
@@ -121,7 +121,7 @@ class EmailController extends Controller
         if (empty($validated['domain_id'])) {
             $emailParts = explode('@', $validated['email_address']);
             $domainName = end($emailParts);
-            
+
             $domain = Domain::where('domain_name', $domainName)->first();
             if ($domain) {
                 $validated['domain_id'] = $domain->id;

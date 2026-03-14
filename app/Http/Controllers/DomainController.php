@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Domain;
+use App\Models\Payment;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -32,7 +33,22 @@ class DomainController extends Controller
             'notes' => 'nullable|string',
         ]);
 
-        Domain::create($validated);
+        $domain = Domain::create($validated);
+
+        if ($domain->annual_cost > 0) {
+            Payment::create([
+                'domain_id'      => $domain->id,
+                'payment_type'   => 'domain',
+                'amount'         => $domain->annual_cost,
+                'currency'       => 'USD',
+                'usd_equivalent' => $domain->annual_cost,
+                'payment_method' => 'Auto-recorded',
+                'payment_date'   => $domain->registration_date,
+                'status'         => 'completed',
+                'notes'          => 'Domain registration: ' . $domain->domain_name,
+                'receipt_number' => 'RCT-' . strtoupper(uniqid()),
+            ]);
+        }
 
         return redirect()->route('domains.index')->with('success', 'Domain registered successfully!');
     }

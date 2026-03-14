@@ -11,6 +11,8 @@ class Payment extends Model
 
     protected $fillable = [
         'website_id',
+        'domain_id',
+        'payment_type',
         'amount',
         'currency',
         'usd_equivalent',
@@ -31,6 +33,11 @@ class Payment extends Model
     public function website()
     {
         return $this->belongsTo(Website::class);
+    }
+
+    public function domain()
+    {
+        return $this->belongsTo(Domain::class);
     }
 
     /**

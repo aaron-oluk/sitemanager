@@ -68,12 +68,12 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Associated Website</label>
-                        <select name="associated_website"
+                        <select name="website_id"
                             class="mt-1 w-full rounded-md border-gray-300 focus:ring-2 focus:ring-blue-500">
                             <option value="">-- No website association --</option>
                             @foreach ($websites as $id => $websiteName)
                                 <option value="{{ $id }}"
-                                    {{ old('associated_website', $email->associated_website) == $id ? 'selected' : '' }}>
+                                    {{ old('website_id', $email->website_id) == $id ? 'selected' : '' }}>
                                     {{ $websiteName }}</option>
                             @endforeach
                         </select>
