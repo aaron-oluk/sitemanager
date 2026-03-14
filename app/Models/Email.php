@@ -95,12 +95,12 @@ class Email extends Model
     public static function getHostingPlanOptions(): array
     {
         return [
-            'monthly' => 'Monthly',
-            'quarterly' => 'Quarterly',
-            'biannual' => 'Bi-Annual',
-            'annual' => 'Annual',
-            'biennial' => 'Bi-Annual (2 Years)',
-            'triennial' => 'Tri-Annual (3 Years)',
+            'monthly' => 'Monthly (1 month)',
+            'quarterly' => 'Quarterly (3 months)',
+            'biannual' => 'Bi-Annual (6 months)',
+            'annual' => 'Annual (12 months)',
+            'biennial' => 'Bi-Annual (24 months)',
+            'triennial' => 'Tri-Annual (36 months)',
         ];
     }
 
