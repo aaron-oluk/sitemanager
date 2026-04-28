@@ -99,6 +99,27 @@
                     </div>
                 </div>
 
+                <div class="p-4 bg-blue-50 rounded border border-blue-200 space-y-4">
+                    <h3 class="text-sm font-medium text-blue-900">Email Cost Calculator</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="email_monthly_cost_create" class="block text-sm font-medium text-gray-700">Monthly Cost</label>
+                            <input id="email_monthly_cost_create" type="number" step="0.01" min="0" value="{{ old('monthly_cost') }}" class="mt-1 w-full rounded-md border-gray-300 focus:ring-2 focus:ring-blue-500" />
+                            <button id="calculate-email-cost-create" type="button" class="mt-3 px-4 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium">Calculate Cost</button>
+                        </div>
+                        <div class="grid grid-cols-1 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Plan Duration (Months)</label>
+                                <input id="email_plan_months_create" type="text" class="mt-1 w-full rounded-md border-gray-300 bg-gray-50" readonly />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Estimated Plan Cost</label>
+                                <input id="email_total_cost_create" type="text" class="mt-1 w-full rounded-md border-gray-300 bg-gray-50" readonly />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Notes</label>
                     <textarea name="notes" rows="4" class="mt-1 w-full rounded-md border-gray-300 focus:ring-2 focus:ring-blue-500">{{ old('notes') }}</textarea>
@@ -119,8 +140,54 @@
             const label = document.getElementById('cost_label');
             label.textContent = 'Monthly Cost (' + months + (months == 1 ? ' month)' : ' months)');
         }
+
+        function updateEmailCostPreview() {
+            const planSelect = document.getElementById('hosting_plan');
+            const costInput = document.getElementById('email_monthly_cost_create');
+            const monthsField = document.getElementById('email_plan_months_create');
+            const totalField = document.getElementById('email_total_cost_create');
+
+            if (!planSelect || !costInput || !monthsField || !totalField) {
+                return;
+            }
+
+            const selectedOption = planSelect.options[planSelect.selectedIndex];
+            const months = parseInt(selectedOption.dataset.months || '1', 10);
+            const monthly = Math.max(parseFloat(costInput.value || '0'), 0);
+            const total = monthly * months;
+
+            monthsField.value = months;
+            totalField.value = '$' + Number(total || 0).toFixed(2);
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
-            updateCostLabel(document.getElementById('hosting_plan'));
+            const hostingPlan = document.getElementById('hosting_plan');
+            const costButton = document.getElementById('calculate-email-cost-create');
+            const costInput = document.getElementById('email_monthly_cost_create');
+
+            updateCostLabel(hostingPlan);
+            updateEmailCostPreview();
+
+            if (costButton) {
+                costButton.addEventListener('click', updateEmailCostPreview);
+            }
+
+            if (costInput) {
+                costInput.addEventListener('input', updateEmailCostPreview);
+                costInput.addEventListener('keydown', function (event) {
+                    if (event.key === 'Enter') {
+                        event.preventDefault();
+                        updateEmailCostPreview();
+                    }
+                });
+            }
+
+            if (hostingPlan) {
+                hostingPlan.addEventListener('change', function () {
+                    updateCostLabel(hostingPlan);
+                    updateEmailCostPreview();
+                });
+            }
         });
     </script>
 @endsection

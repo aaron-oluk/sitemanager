@@ -36,8 +36,16 @@
                         <input type="date" name="registration_date" value="{{ old('registration_date') }}" required class="mt-1 w-full rounded-md border-gray-300 focus:ring-2 focus:ring-purple-500" />
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700">Expiry Date</label>
-                        <input type="date" name="expiry_date" value="{{ old('expiry_date') }}" required class="mt-1 w-full rounded-md border-gray-300 focus:ring-2 focus:ring-purple-500" />
+                        <label class="block text-sm font-medium text-gray-700">Subscription Duration</label>
+                        <select id="subscription_duration_create" name="subscription_duration_months" required class="mt-1 w-full rounded-md border-gray-300 focus:ring-2 focus:ring-purple-500">
+                            @foreach($durationOptions as $months => $label)
+                                <option value="{{ $months }}" {{ old('subscription_duration_months', 12) == $months ? 'selected' : '' }}>{{ $label }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Calculated Expiry Date</label>
+                        <input id="calculated_expiry_create" type="date" value="" readonly class="mt-1 w-full rounded-md border-gray-300 bg-gray-50" />
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Annual Cost</label>
@@ -93,13 +101,16 @@
 
     <script>
         (function () {
+            const registrationInput = document.querySelector('input[name="registration_date"]');
+            const durationSelect = document.getElementById('subscription_duration_create');
+            const expiryPreview = document.getElementById('calculated_expiry_create');
             const baseInput = document.getElementById('renewal_base_cost_create');
             const calculateButton = document.getElementById('calculate-renewal-create');
             const taxPreview = document.getElementById('renewal_tax_preview_create');
             const txnPreview = document.getElementById('renewal_txn_preview_create');
             const totalPreview = document.getElementById('renewal_total_preview_create');
 
-            if (!baseInput || !calculateButton || !taxPreview || !txnPreview || !totalPreview) {
+            if (!registrationInput || !durationSelect || !expiryPreview || !baseInput || !calculateButton || !taxPreview || !txnPreview || !totalPreview) {
                 return;
             }
 
@@ -118,7 +129,27 @@
                 totalPreview.value = formatMoney(total);
             }
 
+            function updateExpiryPreview() {
+                const registrationDate = registrationInput.value;
+                const durationMonths = parseInt(durationSelect.value || '12', 10);
+
+                if (!registrationDate) {
+                    expiryPreview.value = '';
+                    return;
+                }
+
+                const date = new Date(registrationDate + 'T00:00:00');
+                date.setMonth(date.getMonth() + durationMonths);
+
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                expiryPreview.value = year + '-' + month + '-' + day;
+            }
+
             calculateButton.addEventListener('click', updateRenewalPreview);
+            registrationInput.addEventListener('input', updateExpiryPreview);
+            durationSelect.addEventListener('change', updateExpiryPreview);
             baseInput.addEventListener('input', updateRenewalPreview);
             baseInput.addEventListener('keydown', function (event) {
                 if (event.key === 'Enter') {
@@ -127,6 +158,7 @@
                 }
             });
 
+            updateExpiryPreview();
             updateRenewalPreview();
         })();
     </script>

@@ -4,12 +4,19 @@ namespace App\Http\Controllers;
 
 use App\Models\Domain;
 use App\Models\Payment;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 
 class DomainController extends Controller
 {
+    private const DURATION_OPTIONS = [
+        12 => '12 months (1 year)',
+        24 => '24 months (2 years)',
+        36 => '36 months (3 years)',
+    ];
+
     public function index(): View
     {
         $domains = Domain::latest()->paginate(15);
@@ -18,7 +25,9 @@ class DomainController extends Controller
 
     public function create(): View
     {
-        return view('domains.create');
+        return view('domains.create', [
+            'durationOptions' => self::DURATION_OPTIONS,
+        ]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -27,11 +36,18 @@ class DomainController extends Controller
             'domain_name' => 'required|string|max:255|unique:domains',
             'registrar' => 'required|string|max:255',
             'registration_date' => 'required|date',
-            'expiry_date' => 'required|date|after:registration_date',
+            'subscription_duration_months' => 'required|integer|in:12,24,36',
             'annual_cost' => 'required|numeric|min:0',
             'status' => 'required|in:active,expired,pending',
             'notes' => 'nullable|string',
         ]);
+
+        $validated['expiry_date'] = $this->calculateExpiryDate(
+            $validated['registration_date'],
+            (int) $validated['subscription_duration_months']
+        );
+
+        unset($validated['subscription_duration_months']);
 
         $domain = Domain::create($validated);
 
@@ -60,7 +76,11 @@ class DomainController extends Controller
 
     public function edit(Domain $domain): View
     {
-        return view('domains.edit', compact('domain'));
+        return view('domains.edit', [
+            'domain' => $domain,
+            'durationOptions' => self::DURATION_OPTIONS,
+            'selectedDurationMonths' => $this->getDurationMonths($domain),
+        ]);
     }
 
     public function update(Request $request, Domain $domain): RedirectResponse
@@ -69,11 +89,18 @@ class DomainController extends Controller
             'domain_name' => 'required|string|max:255|unique:domains,domain_name,' . $domain->id,
             'registrar' => 'required|string|max:255',
             'registration_date' => 'required|date',
-            'expiry_date' => 'required|date|after:registration_date',
+            'subscription_duration_months' => 'required|integer|in:12,24,36',
             'annual_cost' => 'required|numeric|min:0',
             'status' => 'required|in:active,expired,pending',
             'notes' => 'nullable|string',
         ]);
+
+        $validated['expiry_date'] = $this->calculateExpiryDate(
+            $validated['registration_date'],
+            (int) $validated['subscription_duration_months']
+        );
+
+        unset($validated['subscription_duration_months']);
 
         $domain->update($validated);
 
@@ -85,5 +112,40 @@ class DomainController extends Controller
         $domain->delete();
 
         return redirect()->route('domains.index')->with('success', 'Domain deleted successfully!');
+    }
+
+    private function calculateExpiryDate(string $registrationDate, int $durationMonths): string
+    {
+        return Carbon::parse($registrationDate)
+            ->addMonthsNoOverflow($durationMonths)
+            ->format('Y-m-d');
+    }
+
+    private function getDurationMonths(Domain $domain): int
+    {
+        if (!$domain->registration_date || !$domain->expiry_date) {
+            return 12;
+        }
+
+        $months = max(1, (int) $domain->registration_date->diffInMonths($domain->expiry_date, false));
+
+        if (in_array($months, array_keys(self::DURATION_OPTIONS), true)) {
+            return $months;
+        }
+
+        $supportedDurations = array_keys(self::DURATION_OPTIONS);
+        $closestDuration = 12;
+        $closestDistance = PHP_INT_MAX;
+
+        foreach ($supportedDurations as $supportedDuration) {
+            $distance = abs($supportedDuration - $months);
+
+            if ($distance < $closestDistance) {
+                $closestDistance = $distance;
+                $closestDuration = $supportedDuration;
+            }
+        }
+
+        return $closestDuration;
     }
 }
