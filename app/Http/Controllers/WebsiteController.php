@@ -72,6 +72,7 @@ class WebsiteController extends Controller
         $validated = array_merge($validated, $domainCost);
 
         $domain = null;
+        $domainAnnualCost = $validated['domain_purchased'] ? (float) ($validated['domain_base_cost'] ?? 0) : 0;
 
         // If domain_id is provided, link to existing domain
         // If not, create a new domain record
@@ -79,6 +80,9 @@ class WebsiteController extends Controller
             $domain = Domain::find($validated['domain_id']);
             if ($domain) {
                 $validated['domain'] = $domain->domain_name;
+                if ($domainAnnualCost > 0) {
+                    $domain->update(['annual_cost' => $domainAnnualCost]);
+                }
             }
         } else {
             // Create new domain if not linked to existing one
@@ -86,16 +90,16 @@ class WebsiteController extends Controller
                 Log::info('Creating new domain for website');
                 Log::info('Domain name: ' . $validated['domain']);
                 Log::info('Deployment date: ' . $validated['deployment_date']->format('Y-m-d'));
-                
+
                 $expiryDate = $validated['deployment_date']->copy()->addYear();
                 Log::info('Calculated expiry date: ' . $expiryDate->format('Y-m-d'));
-                
+
                 $domain = Domain::create([
                     'domain_name' => $validated['domain'],
                     'registrar' => 'Unknown',
                     'registration_date' => $validated['deployment_date'],
                     'expiry_date' => $expiryDate,
-                    'annual_cost' => 0,
+                    'annual_cost' => $domainAnnualCost,
                     'status' => 'active',
                     'notes' => 'Auto-created from website registration',
                 ]);
@@ -186,12 +190,16 @@ class WebsiteController extends Controller
         );
         $validated = array_merge($validated, $domainCost);
 
+        $domainAnnualCost = $validated['domain_purchased'] ? (float) ($validated['domain_base_cost'] ?? 0) : 0;
+
         // Handle domain relationship
         if (!empty($validated['domain_id'])) {
             $domain = Domain::find($validated['domain_id']);
             if ($domain) {
                 $validated['domain'] = $domain->domain_name;
-                
+                if ($domainAnnualCost > 0) {
+                    $domain->update(['annual_cost' => $domainAnnualCost]);
+                }
                 // Update pivot table
                 $website->domains()->sync([$domain->id => ['is_primary' => true]]);
             }
