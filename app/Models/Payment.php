@@ -12,8 +12,10 @@ class Payment extends Model
     protected $fillable = [
         'website_id',
         'domain_id',
+        'email_id',
         'payment_type',
         'amount',
+        'amount_due',
         'currency',
         'usd_equivalent',
         'payment_method',
@@ -27,6 +29,7 @@ class Payment extends Model
     protected $casts = [
         'payment_date' => 'date',
         'amount' => 'decimal:2',
+        'amount_due' => 'decimal:2',
         'usd_equivalent' => 'decimal:2',
     ];
 
@@ -38,6 +41,19 @@ class Payment extends Model
     public function domain()
     {
         return $this->belongsTo(Domain::class);
+    }
+
+    public function email()
+    {
+        return $this->belongsTo(\App\Models\Email::class);
+    }
+
+    public function getIsFullyPaidAttribute(): bool
+    {
+        if ($this->amount_due === null || (float) $this->amount_due <= 0) {
+            return true;
+        }
+        return (float) $this->amount >= (float) $this->amount_due;
     }
 
     public function getFormattedAmountAttribute(): string

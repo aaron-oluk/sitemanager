@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Payment;
 use App\Models\Website;
+use App\Models\Domain;
+use App\Models\Email;
 use App\Services\CurrencyService;
 use App\Services\BillingScheduleService;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -28,42 +30,93 @@ class PaymentController extends Controller
     public function index(): View
     {
         $payments = Payment::with(['website', 'domain'])->latest()->paginate(15);
-        return view('payments.index', compact('payments'));
+
+        $totalRevenue  = Payment::where('status', 'completed')->sum('usd_equivalent');
+        $monthRevenue  = Payment::where('status', 'completed')
+            ->whereMonth('payment_date', now()->month)
+            ->whereYear('payment_date', now()->year)
+            ->sum('usd_equivalent');
+        $totalPayments = Payment::count();
+
+        return view('payments.index', compact('payments', 'totalRevenue', 'monthRevenue', 'totalPayments'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create(): View
     {
-        $websites = Website::orderBy('name')->pluck('name', 'id');
         $currencies = $this->currencyService->getAvailableCurrencies();
-        return view('payments.create', compact('websites', 'currencies'));
-    }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request): RedirectResponse
-    {
-        $validated = $request->validate([
-            'website_id' => 'required|exists:websites,id',
-            'amount' => 'required|numeric|min:0',
-            'currency' => 'required|string|in:' . implode(',', $this->currencyService->getAvailableCurrencies()),
-            'payment_method' => 'required|string|max:255',
-            'transaction_id' => 'nullable|string|max:255',
-            'payment_date' => 'nullable|date',
-            'status' => 'required|in:completed,pending,failed',
-            'notes' => 'nullable|string',
+        $websites = Website::orderBy('name')->get(['id', 'name', 'domain', 'amount_paid', 'currency']);
+        $domains  = Domain::orderBy('domain_name')->get(['id', 'domain_name', 'annual_cost']);
+        $emails   = Email::orderBy('email_address')->get(['id', 'email_address', 'monthly_cost', 'hosting_plan']);
+
+        // Build lightweight payloads for the JS picker
+        $websiteData = $websites->map(fn ($w) => [
+            'id'         => $w->id,
+            'label'      => $w->name . ' (' . $w->domain . ')',
+            'amount_due' => (float) $w->amount_paid,
+            'currency'   => $w->currency,
+            'breakdown'  => [
+                ['label' => 'Hosting fee', 'amount' => (float) $w->amount_paid],
+            ],
         ]);
 
-        $validated['payment_date'] = $this->billingScheduleService->now()->toDateString();
+        $domainData = $domains->map(fn ($d) => [
+            'id'         => $d->id,
+            'label'      => $d->domain_name,
+            'amount_due' => (float) $d->renewal_total_cost,
+            'currency'   => 'USD',
+            'breakdown'  => [
+                ['label' => 'Registrar cost (base)',  'amount' => (float) $d->annual_cost],
+                ['label' => 'Tax (18%)',              'amount' => (float) $d->renewal_tax_amount],
+                ['label' => 'Transaction fee (2.5%)', 'amount' => (float) $d->renewal_transaction_fee],
+            ],
+        ]);
 
-        // Generate receipt number if not provided
-        $validated['receipt_number'] = $validated['receipt_number'] ?? 'RCT-' . strtoupper(uniqid());
-        
-        // Calculate USD equivalent
-        $validated['usd_equivalent'] = $this->currencyService->toUSD($validated['amount'], $validated['currency']);
+        $emailData = $emails->map(fn ($e) => [
+            'id'         => $e->id,
+            'label'      => $e->email_address . ' (' . ucfirst($e->hosting_plan ?? 'monthly') . ')',
+            'amount_due' => (float) $e->billing_total_cost,
+            'currency'   => 'USD',
+            'breakdown'  => [
+                ['label' => 'Subtotal (' . $e->billing_duration_months . ' mo × $' . number_format((float) $e->monthly_cost, 2) . ')', 'amount' => (float) $e->billing_subtotal],
+                ['label' => 'Tax (18%)',              'amount' => (float) $e->billing_tax_amount],
+                ['label' => 'Transaction fee (2.5%)', 'amount' => (float) $e->billing_transaction_fee],
+            ],
+        ]);
+
+        return view('payments.create', compact('currencies', 'websiteData', 'domainData', 'emailData'));
+    }
+
+    public function store(Request $request): RedirectResponse
+    {
+        $currencyList = implode(',', $this->currencyService->getAvailableCurrencies());
+
+        $validated = $request->validate([
+            'payment_type'   => 'required|in:website,domain,email',
+            'website_id'     => 'nullable|required_if:payment_type,website|exists:websites,id',
+            'domain_id'      => 'nullable|required_if:payment_type,domain|exists:domains,id',
+            'email_id'       => 'nullable|required_if:payment_type,email|exists:emails,id',
+            'amount_due'     => 'required|numeric|min:0',
+            'amount'         => 'required|numeric|min:0',
+            'currency'       => 'required|string|in:' . $currencyList,
+            'payment_method' => 'required|string|max:255',
+            'transaction_id' => 'nullable|string|max:255',
+            'notes'          => 'nullable|string',
+        ]);
+
+        // Auto-determine status from paid vs due
+        $amountDue  = (float) $validated['amount_due'];
+        $amountPaid = (float) $validated['amount'];
+        $validated['status'] = ($amountDue > 0 && $amountPaid >= $amountDue) ? 'completed' : 'pending';
+
+        $validated['payment_date']   = $this->billingScheduleService->now()->toDateString();
+        $validated['receipt_number'] = 'RCT-' . strtoupper(uniqid());
+        $validated['usd_equivalent'] = $this->currencyService->toUSD($amountPaid, $validated['currency']);
+
+        // Clear unrelated FK columns
+        if ($validated['payment_type'] !== 'website') $validated['website_id'] = null;
+        if ($validated['payment_type'] !== 'domain')  $validated['domain_id']  = null;
+        if ($validated['payment_type'] !== 'email')   $validated['email_id']   = null;
 
         Payment::create($validated);
 
@@ -75,44 +128,40 @@ class PaymentController extends Controller
      */
     public function show(Payment $payment): View
     {
-        $payment->load('website');
+        $payment->load(['website', 'domain', 'email']);
         return view('payments.show', compact('payment'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(Payment $payment): View
     {
-        $websites = Website::orderBy('name')->pluck('name', 'id');
+        $payment->load(['website', 'domain', 'email']);
         $currencies = $this->currencyService->getAvailableCurrencies();
-        return view('payments.edit', compact('payment', 'websites', 'currencies'));
+        return view('payments.edit', compact('payment', 'currencies'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, Payment $payment): RedirectResponse
     {
+        $currencyList = implode(',', $this->currencyService->getAvailableCurrencies());
+
         $validated = $request->validate([
-            'website_id' => 'required|exists:websites,id',
-            'amount' => 'required|numeric|min:0',
-            'currency' => 'required|string|in:' . implode(',', $this->currencyService->getAvailableCurrencies()),
+            'amount'         => 'required|numeric|min:0',
+            'amount_due'     => 'nullable|numeric|min:0',
+            'currency'       => 'required|string|in:' . $currencyList,
             'payment_method' => 'required|string|max:255',
             'transaction_id' => 'nullable|string|max:255',
-            'payment_date' => 'nullable|date',
-            'status' => 'required|in:completed,pending,failed',
-            'notes' => 'nullable|string',
+            'notes'          => 'nullable|string',
         ]);
 
-        $validated['payment_date'] = $validated['payment_date'] ?? ($payment->payment_date?->toDateString() ?? $this->billingScheduleService->now()->toDateString());
+        // Recalculate status from paid vs due
+        $amountDue  = (float) ($validated['amount_due'] ?? $payment->amount_due ?? 0);
+        $amountPaid = (float) $validated['amount'];
+        $validated['status'] = ($amountDue > 0 && $amountPaid >= $amountDue) ? 'completed' : 'pending';
 
-        // Calculate USD equivalent
-        $validated['usd_equivalent'] = $this->currencyService->toUSD($validated['amount'], $validated['currency']);
+        $validated['usd_equivalent'] = $this->currencyService->toUSD($amountPaid, $validated['currency']);
 
         $payment->update($validated);
 
-        return redirect()->route('payments.index')->with('success', 'Payment updated successfully!');
+        return redirect()->route('payments.show', $payment)->with('success', 'Payment updated.');
     }
 
     /**

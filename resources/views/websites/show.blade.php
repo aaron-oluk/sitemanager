@@ -93,22 +93,15 @@
                         <dd class="mt-1 text-sm {{ $website->domainRelation->isExpiringSoon() ? 'text-amber-600 font-semibold' : 'text-gray-900' }}">
                             {{ optional($website->domainRelation->expiry_date)->format('M j, Y') }}
                             @if($website->domainRelation->isExpiringSoon())
-                                <span class="block text-xs font-normal">⚠ {{ now()->diffInDays($website->domainRelation->expiry_date) }} days left</span>
+                                <span class="block text-xs font-normal text-amber-600">{{ now()->diffInDays($website->domainRelation->expiry_date) }} days left</span>
                             @endif
                         </dd>
                     </div>
                 </dl>
-            </div>
-            @endif
-
-            {{-- Domain cost breakdown --}}
-            @if($website->domain_purchased)
-            <div class="bg-white rounded-xl border border-gray-200 shadow-sm">
-                <div class="px-5 py-4 border-b border-gray-100">
-                    <h2 class="font-semibold text-gray-900">Domain Cost Breakdown</h2>
-                </div>
-                <div class="px-5 py-4">
-                    <div class="space-y-2 text-sm">
+                @if($website->domain_purchased)
+                <div class="px-5 pb-4 border-t border-gray-50 pt-3">
+                    <p class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Cost Breakdown</p>
+                    <div class="space-y-1.5 text-sm">
                         <div class="flex justify-between text-gray-600">
                             <span>Base cost</span>
                             <span>{{ $website->formatted_domain_base_cost }}</span>
@@ -121,10 +114,36 @@
                             <span>Transaction fee (2.5%)</span>
                             <span>{{ $website->formatted_domain_transaction_fee }}</span>
                         </div>
-                        <div class="flex justify-between font-semibold text-gray-900 pt-2 border-t border-gray-100">
-                            <span>Total</span>
+                        <div class="flex justify-between font-semibold text-gray-900 pt-1.5 border-t border-gray-100 mt-1.5">
+                            <span>Total paid</span>
                             <span>{{ $website->formatted_domain_total_cost }}</span>
                         </div>
+                    </div>
+                </div>
+                @endif
+            </div>
+            @elseif($website->domain_purchased)
+            {{-- Domain purchased but no linked domain record --}}
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm">
+                <div class="px-5 py-4 border-b border-gray-100">
+                    <h2 class="font-semibold text-gray-900">Domain Cost</h2>
+                </div>
+                <div class="px-5 py-4 space-y-1.5 text-sm">
+                    <div class="flex justify-between text-gray-600">
+                        <span>Base cost</span>
+                        <span>{{ $website->formatted_domain_base_cost }}</span>
+                    </div>
+                    <div class="flex justify-between text-gray-600">
+                        <span>Tax (18%)</span>
+                        <span>{{ $website->formatted_domain_tax_amount }}</span>
+                    </div>
+                    <div class="flex justify-between text-gray-600">
+                        <span>Transaction fee (2.5%)</span>
+                        <span>{{ $website->formatted_domain_transaction_fee }}</span>
+                    </div>
+                    <div class="flex justify-between font-semibold text-gray-900 pt-1.5 border-t border-gray-100 mt-1.5">
+                        <span>Total paid</span>
+                        <span>{{ $website->formatted_domain_total_cost }}</span>
                     </div>
                 </div>
             </div>

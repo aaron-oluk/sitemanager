@@ -12,14 +12,25 @@ use Carbon\Carbon;
 
 class WebsiteController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
-        $websites = Website::with(['payments', 'domainRelation'])->latest()->paginate(10);
-        $totalWebsites = Website::count();
-        $totalRevenue = Payment::sum('usd_equivalent');
-        $activeWebsites = Website::where('status', 'active')->count();
+        $status = $request->query('status');
+        $query = Website::with(['payments', 'domainRelation'])->latest();
+        if ($status && in_array($status, ['active', 'inactive', 'maintenance'])) {
+            $query->where('status', $status);
+        }
+        $websites = $query->paginate(15)->withQueryString();
 
-        return view('websites.index', compact('websites', 'totalWebsites', 'totalRevenue', 'activeWebsites'));
+        $totalWebsites   = Website::count();
+        $activeWebsites  = Website::where('status', 'active')->count();
+        $maintenanceWebsites = Website::where('status', 'maintenance')->count();
+        $inactiveWebsites = Website::where('status', 'inactive')->count();
+        $totalRevenue    = Payment::sum('usd_equivalent');
+
+        return view('websites.index', compact(
+            'websites', 'totalWebsites', 'totalRevenue',
+            'activeWebsites', 'maintenanceWebsites', 'inactiveWebsites', 'status'
+        ));
     }
 
     public function create(): View
