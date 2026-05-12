@@ -29,7 +29,7 @@ class PaymentController extends Controller
      */
     public function index(): View
     {
-        $payments = Payment::with(['website', 'domain'])->latest()->paginate(15);
+        $payments = Payment::with(['website', 'domain', 'lineItems'])->latest()->paginate(15);
 
         $totalRevenue  = Payment::where('status', 'completed')->sum('usd_equivalent');
         $monthRevenue  = Payment::where('status', 'completed')
@@ -248,13 +248,13 @@ class PaymentController extends Controller
 
     public function viewReceipt(Payment $payment): View
     {
-        $payment->load('website');
+        $payment->load(['website', 'lineItems']);
         return view('payments.receipt', compact('payment'));
     }
 
     public function generateReceipt(Payment $payment)
     {
-        $payment->load('website');
+        $payment->load(['website', 'lineItems']);
         $pdf = Pdf::loadView('payments.receipt', ['payment' => $payment]);
         $filename = 'receipt-' . ($payment->receipt_number ?? $payment->id) . '.pdf';
         return $pdf->download($filename);

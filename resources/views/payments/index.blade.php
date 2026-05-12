@@ -47,18 +47,26 @@
                 @forelse($payments as $payment)
                 <tr class="hover:bg-gray-50 transition-colors">
                     <td class="px-5 py-3.5">
-                        <div class="flex items-center gap-2">
-                            <span class="text-xs px-1.5 py-0.5 rounded font-medium
-                                {{ $payment->payment_type === 'domain' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700' }}">
-                                {{ ucfirst($payment->payment_type ?? 'website') }}
-                            </span>
-                            <span class="text-sm font-medium text-gray-900">
-                                @if($payment->payment_type === 'domain')
-                                    {{ $payment->domain->domain_name ?? 'N/A' }}
-                                @else
-                                    {{ $payment->website->name ?? 'N/A' }}
-                                @endif
-                            </span>
+                        <p class="text-sm font-medium text-gray-900 mb-1">
+                            {{ $payment->website->name ?? $payment->domain->domain_name ?? 'N/A' }}
+                        </p>
+                        <div class="flex flex-wrap gap-1">
+                            @if($payment->lineItems->count())
+                                @foreach($payment->lineItems as $item)
+                                    <span class="text-xs px-1.5 py-0.5 rounded font-medium
+                                        {{ $item->item_type === 'domain' ? 'bg-purple-100 text-purple-700' :
+                                           ($item->item_type === 'email'  ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700') }}">
+                                        {{ ucfirst($item->item_type) }}
+                                    </span>
+                                @endforeach
+                            @else
+                                {{-- legacy payments without line items --}}
+                                <span class="text-xs px-1.5 py-0.5 rounded font-medium
+                                    {{ $payment->payment_type === 'domain' ? 'bg-purple-100 text-purple-700' :
+                                       ($payment->payment_type === 'email'  ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700') }}">
+                                    {{ ucfirst($payment->payment_type ?? 'website') }}
+                                </span>
+                            @endif
                         </div>
                     </td>
                     <td class="px-5 py-3.5 text-sm text-gray-600">{{ $payment->payment_method }}</td>
