@@ -38,11 +38,23 @@ class EmailController extends Controller
 
     public function create(): View
     {
-        $domains = Domain::orderBy('domain_name')->pluck('domain_name', 'id');
+        $domains  = Domain::orderBy('domain_name')->pluck('domain_name', 'id');
         $websites = Website::orderBy('name')->pluck('name', 'id');
-        $hostingPlans = Email::getHostingPlanOptions();
+
+        $websiteData = Website::with('domainRelation')
+            ->orderBy('name')
+            ->get(['id', 'name', 'host_server', 'domain_id', 'domain'])
+            ->map(fn ($w) => [
+                'id'         => $w->id,
+                'host_server' => $w->host_server ?? '',
+                'domain_id'   => $w->domain_id,
+                'domain_name' => $w->domainRelation?->domain_name ?? $w->domain ?? '',
+            ])
+            ->keyBy('id');
+
+        $hostingPlans  = Email::getHostingPlanOptions();
         $statusOptions = Email::getStatusOptions();
-        return view('emails.create', compact('domains', 'websites', 'hostingPlans', 'statusOptions'));
+        return view('emails.create', compact('domains', 'websites', 'websiteData', 'hostingPlans', 'statusOptions'));
     }
 
     public function store(Request $request): RedirectResponse

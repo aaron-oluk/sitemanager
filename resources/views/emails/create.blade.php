@@ -22,6 +22,22 @@
     <form method="POST" action="{{ route('emails.store') }}" class="space-y-5">
         @csrf
 
+        {{-- Associated website (drives auto-fill) --}}
+        <div class="bg-white rounded-xl border border-gray-200 shadow-sm">
+            <div class="px-5 py-4 border-b border-gray-100">
+                <h2 class="font-semibold text-gray-900">Associated Website</h2>
+                <p class="text-xs text-gray-400 mt-0.5">Selecting a website auto-fills the domain and provider below.</p>
+            </div>
+            <div class="px-5 py-4">
+                <select id="website_select" name="website_id" class="w-full rounded-lg border-gray-300 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                    <option value="">— No website —</option>
+                    @foreach($websites as $id => $websiteName)
+                        <option value="{{ $id }}" {{ old('website_id') == $id ? 'selected' : '' }}>{{ $websiteName }}</option>
+                    @endforeach
+                </select>
+            </div>
+        </div>
+
         {{-- Account details --}}
         <div class="bg-white rounded-xl border border-gray-200 shadow-sm">
             <div class="px-5 py-4 border-b border-gray-100">
@@ -30,12 +46,12 @@
             <div class="px-5 py-4 grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
                     <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Email Address</label>
-                    <input name="email_address" value="{{ old('email_address') }}" required placeholder="user@domain.com" class="w-full rounded-lg border-gray-300 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
+                    <input name="email_address" id="email_address_input" value="{{ old('email_address') }}" required placeholder="user@domain.com" class="w-full rounded-lg border-gray-300 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
                 </div>
                 <div>
-                    <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Domain <span class="normal-case font-normal">(auto-detected)</span></label>
-                    <select name="domain_id" class="w-full rounded-lg border-gray-300 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                        <option value="">— Auto-detect from email —</option>
+                    <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Domain</label>
+                    <select id="domain_select" name="domain_id" class="w-full rounded-lg border-gray-300 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="">— Select domain —</option>
                         @foreach($domains as $id => $domainName)
                             <option value="{{ $id }}" {{ old('domain_id') == $id ? 'selected' : '' }}>{{ $domainName }}</option>
                         @endforeach
@@ -43,7 +59,7 @@
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Provider</label>
-                    <input name="provider" value="{{ old('provider') }}" required class="w-full rounded-lg border-gray-300 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
+                    <input id="provider_input" name="provider" value="{{ old('provider') }}" required class="w-full rounded-lg border-gray-300 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Hosting Plan</label>
@@ -56,15 +72,6 @@
                 <div>
                     <label id="cost_label" class="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Monthly Cost</label>
                     <input type="number" step="0.01" name="monthly_cost" value="{{ old('monthly_cost') }}" required class="w-full rounded-lg border-gray-300 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Associated Website <span class="normal-case font-normal">(optional)</span></label>
-                    <select name="website_id" class="w-full rounded-lg border-gray-300 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                        <option value="">— No website —</option>
-                        @foreach($websites as $id => $websiteName)
-                            <option value="{{ $id }}" {{ old('website_id') == $id ? 'selected' : '' }}>{{ $websiteName }}</option>
-                        @endforeach
-                    </select>
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Status</label>
@@ -203,8 +210,8 @@ function updateEmailCostPreview() {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
-    const hostingPlan = document.getElementById('hosting_plan');
-    const costInput = document.querySelector('input[name="monthly_cost"]');
+    const hostingPlan     = document.getElementById('hosting_plan');
+    const costInput       = document.querySelector('input[name="monthly_cost"]');
     const frequencySelect = document.getElementById('email_billing_frequency_create');
 
     updateCostLabel(hostingPlan);
@@ -214,6 +221,47 @@ document.addEventListener('DOMContentLoaded', function () {
     costInput.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); updateEmailCostPreview(); } });
     hostingPlan.addEventListener('change', function () { updateCostLabel(hostingPlan); updateEmailCostPreview(); });
     frequencySelect.addEventListener('change', updateEmailCostPreview);
+
+    // Website auto-fill
+    const WEBSITE_DATA   = @json($websiteData);
+    const websiteSelect  = document.getElementById('website_select');
+    const domainSelect   = document.getElementById('domain_select');
+    const providerInput  = document.getElementById('provider_input');
+    const emailInput     = document.getElementById('email_address_input');
+
+    function applyWebsiteAutofill(websiteId) {
+        const w = WEBSITE_DATA[websiteId];
+        if (!w) return;
+
+        // Auto-fill provider from website's host server
+        if (w.host_server && !providerInput.value) {
+            providerInput.value = w.host_server;
+        }
+
+        // Auto-select domain if matched
+        if (w.domain_id) {
+            for (let i = 0; i < domainSelect.options.length; i++) {
+                if (domainSelect.options[i].value == w.domain_id) {
+                    domainSelect.selectedIndex = i;
+
+                    // Suggest the domain in the email address placeholder
+                    if (w.domain_name && emailInput && !emailInput.value) {
+                        emailInput.placeholder = 'user@' + w.domain_name;
+                    }
+                    break;
+                }
+            }
+        }
+    }
+
+    websiteSelect.addEventListener('change', function () {
+        applyWebsiteAutofill(this.value);
+    });
+
+    // Apply on load if value already selected (e.g. validation failure)
+    if (websiteSelect.value) {
+        applyWebsiteAutofill(websiteSelect.value);
+    }
 });
 </script>
 @endsection

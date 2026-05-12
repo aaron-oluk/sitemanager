@@ -125,15 +125,17 @@
             </div>
         </div>
 
-        {{-- Payment --}}
+        {{-- Hosting Cost --}}
         <div class="bg-white rounded-xl border border-gray-200 shadow-sm">
             <div class="px-5 py-4 border-b border-gray-100">
-                <h2 class="font-semibold text-gray-900">Payment</h2>
+                <h2 class="font-semibold text-gray-900">Hosting Cost</h2>
             </div>
             <div class="px-5 py-4 grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
-                    <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Amount Paid</label>
-                    <input id="amount_paid" type="number" step="0.01" name="amount_paid" value="{{ old('amount_paid', $website->amount_paid) }}" required class="w-full rounded-lg border-gray-300 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
+                    <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Base Cost</label>
+                    <input id="amount_paid" type="number" step="0.01" min="0" name="amount_paid"
+                        value="{{ old('amount_paid', $website->amount_paid) }}" required
+                        class="w-full rounded-lg border-gray-300 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Currency</label>
@@ -142,6 +144,24 @@
                             <option value="{{ $currency }}" {{ old('currency', $website->currency)==$currency?'selected':'' }}>{{ $currency }}</option>
                         @endforeach
                     </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Tax (18%)</label>
+                    <input id="hosting_tax_preview" type="text" readonly
+                        value="{{ '$' . number_format($website->hosting_tax_amount, 2) }}"
+                        class="w-full rounded-lg border-gray-200 bg-gray-50 text-sm text-gray-500" />
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Transaction Fee (2.5%)</label>
+                    <input id="hosting_txn_preview" type="text" readonly
+                        value="{{ '$' . number_format($website->hosting_transaction_fee, 2) }}"
+                        class="w-full rounded-lg border-gray-200 bg-gray-50 text-sm text-gray-500" />
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Total Amount Due</label>
+                    <input id="hosting_total_preview" type="text" readonly
+                        value="{{ '$' . number_format($website->hosting_total_cost, 2) }}"
+                        class="w-full rounded-lg border-indigo-200 bg-indigo-50 text-sm font-semibold text-indigo-900" />
                 </div>
             </div>
         </div>
@@ -184,6 +204,24 @@
     checkbox.addEventListener('change', updateDomainCostPreview);
     baseInput.addEventListener('input', updateDomainCostPreview);
     updateDomainCostPreview();
+
+    // Hosting cost preview
+    const hostingBaseInput    = document.getElementById('amount_paid');
+    const hostingTaxPreview   = document.getElementById('hosting_tax_preview');
+    const hostingTxnPreview   = document.getElementById('hosting_txn_preview');
+    const hostingTotalPreview = document.getElementById('hosting_total_preview');
+
+    function updateHostingPreview() {
+        const base  = Math.max(parseFloat(hostingBaseInput.value || '0'), 0);
+        const tax   = base * 0.18;
+        const txn   = base * 0.025;
+        const total = Math.ceil(base + tax + txn);
+        hostingTaxPreview.value   = formatMoney(tax);
+        hostingTxnPreview.value   = formatMoney(txn);
+        hostingTotalPreview.value = formatMoney(total);
+    }
+
+    hostingBaseInput.addEventListener('input', updateHostingPreview);
 })();
 </script>
 @endsection

@@ -45,46 +45,58 @@ class PaymentController extends Controller
     {
         $currencies = $this->currencyService->getAvailableCurrencies();
 
-        $websites = Website::orderBy('name')->get(['id', 'name', 'domain', 'amount_paid', 'currency']);
-        $domains  = Domain::orderBy('domain_name')->get(['id', 'domain_name', 'annual_cost']);
-        $emails   = Email::orderBy('email_address')->get(['id', 'email_address', 'monthly_cost', 'hosting_plan']);
+        $websites = Website::with(['domainRelation', 'emails'])->orderBy('name')->get();
 
-        // Build lightweight payloads for the JS picker
-        $websiteData = $websites->map(fn ($w) => [
-            'id'         => $w->id,
-            'label'      => $w->name . ' (' . $w->domain . ')',
-            'amount_due' => (float) $w->amount_paid,
-            'currency'   => $w->currency,
-            'breakdown'  => [
-                ['label' => 'Hosting fee', 'amount' => (float) $w->amount_paid],
-            ],
-        ]);
+        $websiteData = $websites->map(function ($w) {
+            $items = [];
 
-        $domainData = $domains->map(fn ($d) => [
-            'id'         => $d->id,
-            'label'      => $d->domain_name,
-            'amount_due' => (float) $d->renewal_total_cost,
-            'currency'   => 'USD',
-            'breakdown'  => [
-                ['label' => 'Registrar cost (base)',  'amount' => (float) $d->annual_cost],
-                ['label' => 'Tax (18%)',              'amount' => (float) $d->renewal_tax_amount],
-                ['label' => 'Transaction fee (2.5%)', 'amount' => (float) $d->renewal_transaction_fee],
-            ],
-        ]);
+            $items['hosting'] = [
+                'label'     => 'Hosting',
+                'total'     => (float) $w->hosting_total_cost,
+                'currency'  => $w->currency,
+                'breakdown' => [
+                    ['label' => 'Hosting base cost',      'amount' => (float) $w->amount_paid],
+                    ['label' => 'Tax (18%)',               'amount' => (float) $w->hosting_tax_amount],
+                    ['label' => 'Transaction fee (2.5%)',  'amount' => (float) $w->hosting_transaction_fee],
+                ],
+            ];
 
-        $emailData = $emails->map(fn ($e) => [
-            'id'         => $e->id,
-            'label'      => $e->email_address . ' (' . ucfirst($e->hosting_plan ?? 'monthly') . ')',
-            'amount_due' => (float) $e->billing_total_cost,
-            'currency'   => 'USD',
-            'breakdown'  => [
-                ['label' => 'Subtotal (' . $e->billing_duration_months . ' mo × $' . number_format((float) $e->monthly_cost, 2) . ')', 'amount' => (float) $e->billing_subtotal],
-                ['label' => 'Tax (18%)',              'amount' => (float) $e->billing_tax_amount],
-                ['label' => 'Transaction fee (2.5%)', 'amount' => (float) $e->billing_transaction_fee],
-            ],
-        ]);
+            if ($w->domainRelation) {
+                $d = $w->domainRelation;
+                $items['domain'] = [
+                    'id'        => $d->id,
+                    'label'     => 'Domain — ' . $d->domain_name,
+                    'total'     => (float) $d->renewal_total_cost,
+                    'currency'  => 'USD',
+                    'breakdown' => [
+                        ['label' => 'Registrar cost (base)',  'amount' => (float) $d->annual_cost],
+                        ['label' => 'Tax (18%)',              'amount' => (float) $d->renewal_tax_amount],
+                        ['label' => 'Transaction fee (2.5%)', 'amount' => (float) $d->renewal_transaction_fee],
+                    ],
+                ];
+            }
 
-        return view('payments.create', compact('currencies', 'websiteData', 'domainData', 'emailData'));
+            $items['emails'] = $w->emails->map(fn ($e) => [
+                'id'        => $e->id,
+                'label'     => $e->email_address . ' (' . ucfirst($e->hosting_plan ?? 'monthly') . ')',
+                'total'     => (float) $e->billing_total_cost,
+                'currency'  => 'USD',
+                'breakdown' => [
+                    ['label' => 'Subtotal (' . $e->billing_duration_months . ' mo × $' . number_format((float) $e->monthly_cost, 2) . ')', 'amount' => (float) $e->billing_subtotal],
+                    ['label' => 'Tax (18%)',              'amount' => (float) $e->billing_tax_amount],
+                    ['label' => 'Transaction fee (2.5%)', 'amount' => (float) $e->billing_transaction_fee],
+                ],
+            ])->values()->all();
+
+            return [
+                'id'       => $w->id,
+                'label'    => $w->name . ($w->domain ? ' (' . $w->domain . ')' : ''),
+                'currency' => $w->currency,
+                'items'    => $items,
+            ];
+        })->values()->all();
+
+        return view('payments.create', compact('currencies', 'websiteData'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -92,33 +104,94 @@ class PaymentController extends Controller
         $currencyList = implode(',', $this->currencyService->getAvailableCurrencies());
 
         $validated = $request->validate([
-            'payment_type'   => 'required|in:website,domain,email',
-            'website_id'     => 'nullable|required_if:payment_type,website|exists:websites,id',
-            'domain_id'      => 'nullable|required_if:payment_type,domain|exists:domains,id',
-            'email_id'       => 'nullable|required_if:payment_type,email|exists:emails,id',
-            'amount_due'     => 'required|numeric|min:0',
-            'amount'         => 'required|numeric|min:0',
-            'currency'       => 'required|string|in:' . $currencyList,
-            'payment_method' => 'required|string|max:255',
-            'transaction_id' => 'nullable|string|max:255',
-            'notes'          => 'nullable|string',
+            'website_id'       => 'required|exists:websites,id',
+            'selected_items'   => 'required|array|min:1',
+            'selected_items.*' => 'required|string',
+            'amount'           => 'required|numeric|min:0',
+            'currency'         => 'required|string|in:' . $currencyList,
+            'payment_method'   => 'required|string|max:255',
+            'transaction_id'   => 'nullable|string|max:255',
+            'notes'            => 'nullable|string',
         ]);
 
-        // Auto-determine status from paid vs due
-        $amountDue  = (float) $validated['amount_due'];
-        $amountPaid = (float) $validated['amount'];
-        $validated['status'] = ($amountDue > 0 && $amountPaid >= $amountDue) ? 'completed' : 'pending';
+        $website = Website::with(['domainRelation', 'emails'])->findOrFail($validated['website_id']);
 
-        $validated['payment_date']   = $this->billingScheduleService->now()->toDateString();
-        $validated['receipt_number'] = 'RCT-' . strtoupper(uniqid());
-        $validated['usd_equivalent'] = $this->currencyService->toUSD($amountPaid, $validated['currency']);
+        $lineItemRows = [];
+        $amountDue    = 0.0;
+        $domainId     = null;
 
-        // Clear unrelated FK columns
-        if ($validated['payment_type'] !== 'website') $validated['website_id'] = null;
-        if ($validated['payment_type'] !== 'domain')  $validated['domain_id']  = null;
-        if ($validated['payment_type'] !== 'email')   $validated['email_id']   = null;
+        foreach ($validated['selected_items'] as $key) {
+            if ($key === 'hosting') {
+                $lineItemRows[] = [
+                    'item_type'       => 'hosting',
+                    'label'           => 'Hosting — ' . $website->name,
+                    'unit_cost'       => (float) $website->amount_paid,
+                    'tax_amount'      => (float) $website->hosting_tax_amount,
+                    'transaction_fee' => (float) $website->hosting_transaction_fee,
+                    'total_amount'    => (float) $website->hosting_total_cost,
+                    'currency'        => $website->currency,
+                    'reference_id'    => $website->id,
+                ];
+                $amountDue += $this->currencyService->toUSD((float) $website->hosting_total_cost, $website->currency);
 
-        Payment::create($validated);
+            } elseif ($key === 'domain' && $website->domainRelation) {
+                $d        = $website->domainRelation;
+                $domainId = $d->id;
+                $lineItemRows[] = [
+                    'item_type'       => 'domain',
+                    'label'           => 'Domain renewal — ' . $d->domain_name,
+                    'unit_cost'       => (float) $d->annual_cost,
+                    'tax_amount'      => (float) $d->renewal_tax_amount,
+                    'transaction_fee' => (float) $d->renewal_transaction_fee,
+                    'total_amount'    => (float) $d->renewal_total_cost,
+                    'currency'        => 'USD',
+                    'reference_id'    => $d->id,
+                ];
+                $amountDue += (float) $d->renewal_total_cost;
+
+            } elseif (str_starts_with($key, 'email:')) {
+                $emailId = (int) str_replace('email:', '', $key);
+                $email   = $website->emails->find($emailId);
+                if ($email) {
+                    $lineItemRows[] = [
+                        'item_type'       => 'email',
+                        'label'           => $email->email_address . ' (' . ucfirst($email->hosting_plan ?? 'monthly') . ')',
+                        'unit_cost'       => (float) $email->billing_subtotal,
+                        'tax_amount'      => (float) $email->billing_tax_amount,
+                        'transaction_fee' => (float) $email->billing_transaction_fee,
+                        'total_amount'    => (float) $email->billing_total_cost,
+                        'currency'        => 'USD',
+                        'reference_id'    => $email->id,
+                    ];
+                    $amountDue += (float) $email->billing_total_cost;
+                }
+            }
+        }
+
+        $amountPaid    = (float) $validated['amount'];
+        $usdEquivalent = $this->currencyService->toUSD($amountPaid, $validated['currency']);
+        $status        = ($amountDue > 0 && $usdEquivalent >= $amountDue) ? 'completed' : 'pending';
+
+        $payment = Payment::create([
+            'payment_type'   => 'website',
+            'website_id'     => $website->id,
+            'domain_id'      => $domainId,
+            'email_id'       => null,
+            'amount'         => $amountPaid,
+            'amount_due'     => $amountDue,
+            'currency'       => $validated['currency'],
+            'usd_equivalent' => $usdEquivalent,
+            'payment_method' => $validated['payment_method'],
+            'transaction_id' => $validated['transaction_id'] ?? null,
+            'notes'          => $validated['notes'] ?? null,
+            'payment_date'   => $this->billingScheduleService->now()->toDateString(),
+            'receipt_number' => 'RCT-' . strtoupper(uniqid()),
+            'status'         => $status,
+        ]);
+
+        foreach ($lineItemRows as $row) {
+            $payment->lineItems()->create($row);
+        }
 
         return redirect()->route('payments.index')->with('success', 'Payment recorded successfully!');
     }
@@ -128,7 +201,7 @@ class PaymentController extends Controller
      */
     public function show(Payment $payment): View
     {
-        $payment->load(['website', 'domain', 'email']);
+        $payment->load(['website', 'domain', 'email', 'lineItems']);
         return view('payments.show', compact('payment'));
     }
 

@@ -45,6 +45,11 @@ class Website extends Model
         return $this->hasMany(Payment::class);
     }
 
+    public function emails()
+    {
+        return $this->hasMany(\App\Models\Email::class);
+    }
+
     /**
      * Get the domain associated with this website
      */
@@ -67,6 +72,21 @@ class Website extends Model
             return $this->domainRelation->domain_name;
         }
         return $this->getAttribute('domain');
+    }
+
+    public function getHostingTaxAmountAttribute(): float
+    {
+        return round((float) $this->amount_paid * config('billing.tax_rate'), 2);
+    }
+
+    public function getHostingTransactionFeeAttribute(): float
+    {
+        return round((float) $this->amount_paid * config('billing.transaction_fee_rate'), 2);
+    }
+
+    public function getHostingTotalCostAttribute(): float
+    {
+        return round(ceil((float) $this->amount_paid + $this->hosting_tax_amount + $this->hosting_transaction_fee), 2);
     }
 
     public function getFormattedAmountAttribute(): string

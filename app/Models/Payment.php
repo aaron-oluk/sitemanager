@@ -27,11 +27,16 @@ class Payment extends Model
     ];
 
     protected $casts = [
-        'payment_date' => 'date',
-        'amount' => 'decimal:2',
-        'amount_due' => 'decimal:2',
+        'payment_date'   => 'date',
+        'amount'         => 'decimal:2',
+        'amount_due'     => 'decimal:2',
         'usd_equivalent' => 'decimal:2',
     ];
+
+    public function lineItems()
+    {
+        return $this->hasMany(PaymentLineItem::class);
+    }
 
     public function website()
     {

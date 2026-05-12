@@ -71,27 +71,75 @@
                 </div>
             </div>
         </div>
+        {{-- Line items audit table --}}
+        @if($payment->lineItems->count())
+        <div class="px-6 pt-5 pb-4">
+            <p class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">Items &amp; Cost Breakdown</p>
+            <div class="rounded-xl border border-gray-100 overflow-hidden">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="bg-gray-50 border-b border-gray-100">
+                            <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Item</th>
+                            <th class="px-4 py-2.5 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Unit Cost</th>
+                            <th class="px-4 py-2.5 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Tax (18%)</th>
+                            <th class="px-4 py-2.5 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Fee (2.5%)</th>
+                            <th class="px-4 py-2.5 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-50">
+                        @foreach($payment->lineItems as $item)
+                        @php
+                            $sym = ['USD'=>'$','UGX'=>'USh ','EUR'=>'€','GBP'=>'£','KES'=>'KSh ','TZS'=>'TSh ','NGN'=>'₦'][$item->currency] ?? ($item->currency . ' ');
+                            $dec = in_array($item->currency, ['UGX','TZS']) ? 0 : 2;
+                        @endphp
+                        <tr class="bg-white">
+                            <td class="px-4 py-3">
+                                <span class="font-medium text-gray-900">{{ $item->label }}</span>
+                                <span class="ml-2 text-xs px-1.5 py-0.5 rounded font-medium
+                                    {{ $item->item_type === 'domain' ? 'bg-purple-100 text-purple-600' :
+                                       ($item->item_type === 'email'  ? 'bg-orange-100 text-orange-600' : 'bg-blue-100 text-blue-600') }}">
+                                    {{ ucfirst($item->item_type) }}
+                                </span>
+                            </td>
+                            <td class="px-4 py-3 text-right text-gray-600">{{ $sym }}{{ number_format($item->unit_cost, $dec) }}</td>
+                            <td class="px-4 py-3 text-right text-gray-600">{{ $sym }}{{ number_format($item->tax_amount, $dec) }}</td>
+                            <td class="px-4 py-3 text-right text-gray-600">{{ $sym }}{{ number_format($item->transaction_fee, $dec) }}</td>
+                            <td class="px-4 py-3 text-right font-semibold text-gray-900">{{ $sym }}{{ number_format($item->total_amount, $dec) }}</td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                    @if($payment->lineItems->count() > 1)
+                    <tfoot>
+                        <tr class="bg-indigo-50 border-t border-indigo-100">
+                            <td class="px-4 py-3 text-sm font-semibold text-indigo-900" colspan="4">Total Amount Due</td>
+                            <td class="px-4 py-3 text-right text-sm font-bold text-indigo-900">${{ number_format($payment->amount_due, 2) }}</td>
+                        </tr>
+                    </tfoot>
+                    @endif
+                </table>
+            </div>
+        </div>
+        @endif
+
         <dl class="px-6 py-5 grid grid-cols-2 gap-x-8 gap-y-4">
             <div>
-                <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">For</dt>
-                <dd class="mt-1 text-sm font-medium text-gray-900">
-                    @if($payment->payment_type === 'domain')
-                        {{ $payment->domain->domain_name ?? 'N/A' }}
-                    @elseif($payment->payment_type === 'email')
-                        {{ $payment->email->email_address ?? 'N/A' }}
-                    @else
-                        {{ $payment->website->name ?? 'N/A' }}
-                    @endif
-                </dd>
+                <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">Website</dt>
+                <dd class="mt-1 text-sm font-medium text-gray-900">{{ $payment->website->name ?? 'N/A' }}</dd>
             </div>
             <div>
-                <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">Type</dt>
-                <dd class="mt-1">
-                    <span class="text-xs px-2 py-0.5 rounded font-medium
-                        {{ $payment->payment_type === 'domain' ? 'bg-purple-100 text-purple-700' :
-                           ($payment->payment_type === 'email' ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700') }}">
-                        {{ ucfirst($payment->payment_type ?? 'website') }}
-                    </span>
+                <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">Items</dt>
+                <dd class="mt-1 flex flex-wrap gap-1">
+                    @forelse($payment->lineItems as $item)
+                        <span class="text-xs px-2 py-0.5 rounded font-medium
+                            {{ $item->item_type === 'domain' ? 'bg-purple-100 text-purple-700' :
+                               ($item->item_type === 'email' ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700') }}">
+                            {{ ucfirst($item->item_type) }}
+                        </span>
+                    @empty
+                        <span class="text-xs px-2 py-0.5 rounded font-medium bg-blue-100 text-blue-700">
+                            {{ ucfirst($payment->payment_type ?? 'website') }}
+                        </span>
+                    @endforelse
                 </dd>
             </div>
             <div>
