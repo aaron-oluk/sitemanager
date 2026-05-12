@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Email;
+use App\Services\BillingScheduleService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -11,6 +12,11 @@ use App\Models\Website;
 
 class EmailController extends Controller
 {
+    public function __construct(
+        protected BillingScheduleService $billingScheduleService,
+    ) {
+    }
+
     public function index(): View
     {
         // Get emails grouped by domain for clustering
@@ -23,7 +29,7 @@ class EmailController extends Controller
                     return [
                         'domain' => $domain,
                         'emails' => $emails,
-                        'total_cost' => $emails->sum('monthly_cost'),
+                        'total_cost' => $emails->sum('billing_total_cost'),
                         'count' => $emails->count()
                     ];
                 } else {
@@ -31,7 +37,7 @@ class EmailController extends Controller
                     return [
                         'domain' => null,
                         'emails' => $emails,
-                        'total_cost' => $emails->sum('monthly_cost'),
+                        'total_cost' => $emails->sum('billing_total_cost'),
                         'count' => $emails->count()
                     ];
                 }
@@ -41,7 +47,7 @@ class EmailController extends Controller
         $emails = Email::with(['domain', 'website'])->latest()->paginate(15);
         
         $totalEmails = Email::count();
-        $totalMonthlyCost = Email::sum('monthly_cost');
+        $totalMonthlyCost = Email::all()->sum('billing_total_cost');
         $activeEmails = Email::where('status', 'active')->count();
         
         return view('emails.index', compact('emailsByDomain', 'emails', 'totalEmails', 'totalMonthlyCost', 'activeEmails'));
@@ -66,13 +72,17 @@ class EmailController extends Controller
             'provider' => 'required|string|max:255',
             'hosting_plan' => 'required|string|max:255',
             'monthly_cost' => 'required|numeric|min:0',
-            'start_date' => 'required|date',
-            'renewal_date' => 'required|date|after:start_date',
             'status' => 'required|in:active,inactive,suspended,pending,cancelled',
             'notes' => 'nullable|string',
             'website_id' => 'nullable|exists:websites,id',
             'domain_id' => 'nullable|exists:domains,id',
         ]);
+
+        $startDate = $this->billingScheduleService->now();
+        $validated['start_date'] = $startDate->toDateString();
+        $validated['renewal_date'] = $this->billingScheduleService
+            ->calculateEndDate($startDate, $this->billingScheduleService->durationMonthsForHostingPlan($validated['hosting_plan']))
+            ->toDateString();
 
         // Auto-assign domain if not provided
         if (empty($validated['domain_id'])) {
@@ -109,13 +119,17 @@ class EmailController extends Controller
             'provider' => 'required|string|max:255',
             'hosting_plan' => 'nullable|string|max:255',
             'monthly_cost' => 'required|numeric|min:0',
-            'start_date' => 'required|date',
-            'renewal_date' => 'required|date|after:start_date',
             'status' => 'required|in:active,inactive,suspended,pending,cancelled',
             'notes' => 'nullable|string',
             'website_id' => 'nullable|exists:websites,id',
             'domain_id' => 'nullable|exists:domains,id',
         ]);
+
+        $startDate = $email->start_date ?? $this->billingScheduleService->now();
+        $validated['start_date'] = $startDate->toDateString();
+        $validated['renewal_date'] = $this->billingScheduleService
+            ->calculateEndDate($startDate, $this->billingScheduleService->durationMonthsForHostingPlan($validated['hosting_plan'] ?? $email->hosting_plan ?? 'monthly'))
+            ->toDateString();
 
         // Auto-assign domain if not provided
         if (empty($validated['domain_id'])) {

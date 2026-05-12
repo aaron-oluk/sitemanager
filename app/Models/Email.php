@@ -89,6 +89,59 @@ class Email extends Model
         return '$' . number_format($this->monthly_cost, 2);
     }
 
+    public function getBillingDurationMonthsAttribute(): int
+    {
+        return match ($this->hosting_plan) {
+            'monthly' => 1,
+            'quarterly' => 3,
+            'biannual' => 6,
+            'annual' => 12,
+            'biennial' => 24,
+            'triennial' => 36,
+            default => 1,
+        };
+    }
+
+    public function getBillingSubtotalAttribute(): float
+    {
+        return round(((float) $this->monthly_cost) * $this->billing_duration_months, 2);
+    }
+
+    public function getBillingTaxAmountAttribute(): float
+    {
+        return round($this->billing_subtotal * 0.18, 2);
+    }
+
+    public function getBillingTransactionFeeAttribute(): float
+    {
+        return round($this->billing_subtotal * 0.025, 2);
+    }
+
+    public function getBillingTotalCostAttribute(): float
+    {
+        return round(ceil($this->billing_subtotal + $this->billing_tax_amount + $this->billing_transaction_fee), 2);
+    }
+
+    public function getFormattedBillingSubtotalAttribute(): string
+    {
+        return '$' . number_format($this->billing_subtotal, 2);
+    }
+
+    public function getFormattedBillingTaxAmountAttribute(): string
+    {
+        return '$' . number_format($this->billing_tax_amount, 2);
+    }
+
+    public function getFormattedBillingTransactionFeeAttribute(): string
+    {
+        return '$' . number_format($this->billing_transaction_fee, 2);
+    }
+
+    public function getFormattedBillingTotalCostAttribute(): string
+    {
+        return '$' . number_format($this->billing_total_cost, 2);
+    }
+
     /**
      * Get hosting plan options
      */

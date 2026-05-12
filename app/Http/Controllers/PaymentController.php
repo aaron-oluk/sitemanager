@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Payment;
 use App\Models\Website;
 use App\Services\CurrencyService;
+use App\Services\BillingScheduleService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -13,10 +14,12 @@ use Illuminate\Http\RedirectResponse;
 class PaymentController extends Controller
 {
     protected $currencyService;
+    protected BillingScheduleService $billingScheduleService;
 
-    public function __construct(CurrencyService $currencyService)
+    public function __construct(CurrencyService $currencyService, BillingScheduleService $billingScheduleService)
     {
         $this->currencyService = $currencyService;
+        $this->billingScheduleService = $billingScheduleService;
     }
 
     /**
@@ -49,10 +52,12 @@ class PaymentController extends Controller
             'currency' => 'required|string|in:' . implode(',', $this->currencyService->getAvailableCurrencies()),
             'payment_method' => 'required|string|max:255',
             'transaction_id' => 'nullable|string|max:255',
-            'payment_date' => 'required|date',
+            'payment_date' => 'nullable|date',
             'status' => 'required|in:completed,pending,failed',
             'notes' => 'nullable|string',
         ]);
+
+        $validated['payment_date'] = $this->billingScheduleService->now()->toDateString();
 
         // Generate receipt number if not provided
         $validated['receipt_number'] = $validated['receipt_number'] ?? 'RCT-' . strtoupper(uniqid());
@@ -95,10 +100,12 @@ class PaymentController extends Controller
             'currency' => 'required|string|in:' . implode(',', $this->currencyService->getAvailableCurrencies()),
             'payment_method' => 'required|string|max:255',
             'transaction_id' => 'nullable|string|max:255',
-            'payment_date' => 'required|date',
+            'payment_date' => 'nullable|date',
             'status' => 'required|in:completed,pending,failed',
             'notes' => 'nullable|string',
         ]);
+
+        $validated['payment_date'] = $validated['payment_date'] ?? ($payment->payment_date?->toDateString() ?? $this->billingScheduleService->now()->toDateString());
 
         // Calculate USD equivalent
         $validated['usd_equivalent'] = $this->currencyService->toUSD($validated['amount'], $validated['currency']);

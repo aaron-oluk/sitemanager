@@ -23,7 +23,7 @@
                     <p class="text-2xl font-bold text-gray-900">{{ $totalEmails }}</p>
                 </div>
                 <div class="bg-white rounded shadow border border-gray-100 p-4">
-                    <p class="text-sm text-gray-600">Monthly Cost</p>
+                    <p class="text-sm text-gray-600">Billed Total</p>
                     <p class="text-2xl font-bold text-gray-900">${{ number_format($totalMonthlyCost, 2) }}</p>
                 </div>
                 <div class="bg-white rounded shadow border border-gray-100 p-4">
@@ -41,10 +41,10 @@
                                 <div>
                                     @if($cluster['domain'])
                                         <h3 class="text-lg font-semibold text-gray-900">{{ $cluster['domain']->domain_name }}</h3>
-                                        <p class="text-sm text-gray-600">{{ $cluster['count'] }} email(s) • ${{ number_format($cluster['total_cost'], 2) }}/month</p>
+                                        <p class="text-sm text-gray-600">{{ $cluster['count'] }} email(s) • ${{ number_format($cluster['total_cost'], 2) }} billed</p>
                                     @else
                                         <h3 class="text-lg font-semibold text-gray-900">Unassigned Domain</h3>
-                                        <p class="text-sm text-gray-600">{{ $cluster['count'] }} email(s) • ${{ number_format($cluster['total_cost'], 2) }}/month</p>
+                                        <p class="text-sm text-gray-600">{{ $cluster['count'] }} email(s) • ${{ number_format($cluster['total_cost'], 2) }} billed</p>
                                     @endif
                                 </div>
                                 @if($cluster['domain'])
@@ -83,7 +83,7 @@
                                             </td>
                                             <td class="px-4 py-3 text-sm text-gray-700">{{ $email->provider }}</td>
                                             <td class="px-4 py-3 text-sm text-gray-700">{{ $email->hosting_plan }}</td>
-                                            <td class="px-4 py-3 text-sm text-gray-900 font-semibold">{{ $email->formatted_monthly_cost }}</td>
+                                            <td class="px-4 py-3 text-sm text-gray-900 font-semibold">{{ $email->formatted_billing_total_cost }}</td>
                                             <td class="px-4 py-3 text-sm">
                                                 <span class="px-2 py-1 rounded-full text-xs {{ $email->status === 'active' ? 'bg-green-100 text-green-700' : ($email->status === 'inactive' ? 'bg-gray-100 text-gray-700' : 'bg-red-100 text-red-700') }}">{{ ucfirst($email->status) }}</span>
                                             </td>

@@ -72,6 +72,13 @@
                         </div>
                         <div class="grid grid-cols-1 gap-4">
                             <div>
+                                <label class="block text-sm font-medium text-gray-700">Billing Frequency</label>
+                                <select id="renewal_billing_frequency_edit" class="mt-1 w-full rounded-md border-gray-300 focus:ring-2 focus:ring-purple-500">
+                                    <option value="annual" selected>Annual</option>
+                                    <option value="monthly">Monthly</option>
+                                </select>
+                            </div>
+                            <div>
                                 <label class="block text-sm font-medium text-gray-700">Renewal Tax (18%)</label>
                                 <input id="renewal_tax_preview_edit" type="text" class="mt-1 w-full rounded-md border-gray-300 bg-gray-50" readonly />
                             </div>
@@ -82,6 +89,14 @@
                             <div>
                                 <label class="block text-sm font-medium text-gray-700">Renewal Total Cost</label>
                                 <input id="renewal_total_preview_edit" type="text" class="mt-1 w-full rounded-md border-gray-300 bg-gray-50" readonly />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Number of Payments</label>
+                                <input id="renewal_payment_count_edit" type="text" class="mt-1 w-full rounded-md border-gray-300 bg-gray-50" readonly />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Amount Per Payment</label>
+                                <input id="renewal_payment_amount_edit" type="text" class="mt-1 w-full rounded-md border-gray-300 bg-gray-50" readonly />
                             </div>
                         </div>
                     </div>
@@ -106,12 +121,15 @@
             const durationSelect = document.getElementById('subscription_duration_edit');
             const expiryPreview = document.getElementById('calculated_expiry_edit');
             const baseInput = document.getElementById('renewal_base_cost_edit');
+            const frequencySelect = document.getElementById('renewal_billing_frequency_edit');
             const calculateButton = document.getElementById('calculate-renewal-edit');
             const taxPreview = document.getElementById('renewal_tax_preview_edit');
             const txnPreview = document.getElementById('renewal_txn_preview_edit');
             const totalPreview = document.getElementById('renewal_total_preview_edit');
+            const paymentCountPreview = document.getElementById('renewal_payment_count_edit');
+            const paymentAmountPreview = document.getElementById('renewal_payment_amount_edit');
 
-            if (!registrationInput || !durationSelect || !expiryPreview || !baseInput || !calculateButton || !taxPreview || !txnPreview || !totalPreview) {
+            if (!registrationInput || !durationSelect || !expiryPreview || !baseInput || !frequencySelect || !calculateButton || !taxPreview || !txnPreview || !totalPreview || !paymentCountPreview || !paymentAmountPreview) {
                 return;
             }
 
@@ -124,10 +142,15 @@
                 const tax = base * 0.18;
                 const txn = base * 0.025;
                 const total = Math.ceil(base + tax + txn);
+                const durationMonths = parseInt(durationSelect.value || '12', 10);
+                const paymentCount = frequencySelect.value === 'monthly' ? durationMonths : Math.max(1, Math.ceil(durationMonths / 12));
+                const amountPerPayment = paymentCount > 0 ? total / paymentCount : total;
 
                 taxPreview.value = formatMoney(tax);
                 txnPreview.value = formatMoney(txn);
                 totalPreview.value = formatMoney(total);
+                paymentCountPreview.value = String(paymentCount);
+                paymentAmountPreview.value = formatMoney(amountPerPayment);
             }
 
             function updateExpiryPreview() {
@@ -151,6 +174,7 @@
             calculateButton.addEventListener('click', updateRenewalPreview);
             registrationInput.addEventListener('input', updateExpiryPreview);
             durationSelect.addEventListener('change', updateExpiryPreview);
+            frequencySelect.addEventListener('change', updateRenewalPreview);
             baseInput.addEventListener('input', updateRenewalPreview);
             baseInput.addEventListener('keydown', function (event) {
                 if (event.key === 'Enter') {

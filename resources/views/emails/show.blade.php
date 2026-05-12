@@ -27,6 +27,26 @@
                         <dd class="mt-1 text-gray-900 font-medium">${{ number_format($email->monthly_cost, 2) }}</dd>
                     </div>
                     <div>
+                        <dt class="text-sm text-gray-500">Plan Duration</dt>
+                        <dd class="mt-1 text-gray-900 font-medium">{{ $email->billing_duration_months }} months</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm text-gray-500">Plan Subtotal</dt>
+                        <dd class="mt-1 text-gray-900 font-medium">{{ $email->formatted_billing_subtotal }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm text-gray-500">Tax (18%)</dt>
+                        <dd class="mt-1 text-gray-900 font-medium">{{ $email->formatted_billing_tax_amount }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm text-gray-500">Transaction Fee (2.5%)</dt>
+                        <dd class="mt-1 text-gray-900 font-medium">{{ $email->formatted_billing_transaction_fee }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm text-gray-500">Total Cost</dt>
+                        <dd class="mt-1 text-gray-900 font-semibold">{{ $email->formatted_billing_total_cost }}</dd>
+                    </div>
+                    <div>
                         <dt class="text-sm text-gray-500">Start Date</dt>
                         <dd class="mt-1 text-gray-900 font-medium">{{ optional($email->start_date)->format('M d, Y') }}</dd>
                     </div>

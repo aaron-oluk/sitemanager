@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Domain;
 use App\Models\Payment;
+use App\Services\BillingScheduleService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -116,8 +117,8 @@ class DomainController extends Controller
 
     private function calculateExpiryDate(string $registrationDate, int $durationMonths): string
     {
-        return Carbon::parse($registrationDate)
-            ->addMonthsNoOverflow($durationMonths)
+        return app(BillingScheduleService::class)
+            ->calculateEndDate($registrationDate, $durationMonths)
             ->format('Y-m-d');
     }
 
