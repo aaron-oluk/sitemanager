@@ -161,31 +161,23 @@ class FetchCurrencyRates extends Command
         ];
     }
 
-    /**
-     * Store rates in database
-     */
     protected function storeRates(array $rates): void
     {
         $timestamp = now();
-        
+
         foreach ($rates as $currency => $rate) {
             if ($currency === 'USD') {
-                continue; // Skip USD as it's the base currency
+                continue;
             }
 
-            // Convert rate to USD base (if API returns inverse)
-            $usdRate = 1 / $rate;
-
+            // Store as "1 USD = X currency" — the conventional direction for display.
             CurrencyRate::updateOrCreate(
+                ['base_currency' => 'USD', 'target_currency' => $currency],
                 [
-                    'base_currency' => 'USD',
-                    'target_currency' => $currency,
-                ],
-                [
-                    'rate' => $usdRate,
+                    'rate' => $rate,
                     'last_updated' => $timestamp,
                     'source' => 'exchangerate-api',
-                    'raw_data' => json_encode(['rate' => $rate, 'usd_rate' => $usdRate]),
+                    'raw_data' => json_encode(['rate' => $rate]),
                 ]
             );
         }

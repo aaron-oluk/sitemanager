@@ -115,12 +115,6 @@
                 @endforeach
             </div>
 
-            <!-- Pagination for backward compatibility -->
-            @if($emails->hasPages())
-                <div class="mt-6">
-                    {{ $emails->links() }}
-                </div>
-            @endif
         </div>
     </div>
 @endsection 

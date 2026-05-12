@@ -140,6 +140,16 @@ class SampleDataSeeder extends Seeder
         ];
 
         foreach ($emails as $emailData) {
+            $associatedDomain = $emailData['associated_website'] ?? null;
+            unset($emailData['associated_website']);
+
+            if ($associatedDomain) {
+                $website = Website::where('domain', $associatedDomain)->first();
+                if ($website) {
+                    $emailData['website_id'] = $website->id;
+                }
+            }
+
             Email::create($emailData);
         }
     }

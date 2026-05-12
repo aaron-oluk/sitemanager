@@ -62,12 +62,11 @@ class Email extends Model
         return $parts[0];
     }
 
-    /**
-     * Check if email is expiring soon (within 30 days)
-     */
     public function isExpiringSoon(): bool
     {
-        return $this->renewal_date && $this->renewal_date->diffInDays(now()) <= 30;
+        return $this->renewal_date
+            && $this->renewal_date->isFuture()
+            && now()->diffInDays($this->renewal_date) <= 30;
     }
 
     /**
@@ -91,15 +90,8 @@ class Email extends Model
 
     public function getBillingDurationMonthsAttribute(): int
     {
-        return match ($this->hosting_plan) {
-            'monthly' => 1,
-            'quarterly' => 3,
-            'biannual' => 6,
-            'annual' => 12,
-            'biennial' => 24,
-            'triennial' => 36,
-            default => 1,
-        };
+        return app(\App\Services\BillingScheduleService::class)
+            ->durationMonthsForHostingPlan($this->hosting_plan ?? 'monthly');
     }
 
     public function getBillingSubtotalAttribute(): float
@@ -109,12 +101,12 @@ class Email extends Model
 
     public function getBillingTaxAmountAttribute(): float
     {
-        return round($this->billing_subtotal * 0.18, 2);
+        return round($this->billing_subtotal * config('billing.tax_rate'), 2);
     }
 
     public function getBillingTransactionFeeAttribute(): float
     {
-        return round($this->billing_subtotal * 0.025, 2);
+        return round($this->billing_subtotal * config('billing.transaction_fee_rate'), 2);
     }
 
     public function getBillingTotalCostAttribute(): float

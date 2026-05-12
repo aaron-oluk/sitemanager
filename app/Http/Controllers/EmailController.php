@@ -14,43 +14,26 @@ class EmailController extends Controller
 {
     public function __construct(
         protected BillingScheduleService $billingScheduleService,
-    ) {
-    }
+    ) {}
 
     public function index(): View
     {
-        // Get emails grouped by domain for clustering
-        $emailsByDomain = Email::with(['domain', 'website'])
-            ->get()
-            ->groupBy('domain_id')
-            ->map(function ($emails, $domainId) {
-                if ($domainId) {
-                    $domain = Domain::find($domainId);
-                    return [
-                        'domain' => $domain,
-                        'emails' => $emails,
-                        'total_cost' => $emails->sum('billing_total_cost'),
-                        'count' => $emails->count()
-                    ];
-                } else {
-                    // Emails without domain association
-                    return [
-                        'domain' => null,
-                        'emails' => $emails,
-                        'total_cost' => $emails->sum('billing_total_cost'),
-                        'count' => $emails->count()
-                    ];
-                }
-            });
+        $allEmails = Email::with(['domain', 'website'])->latest()->get();
 
-        // Also get regular paginated emails for backward compatibility
-        $emails = Email::with(['domain', 'website'])->latest()->paginate(15);
-        
-        $totalEmails = Email::count();
-        $totalMonthlyCost = Email::all()->sum('billing_total_cost');
-        $activeEmails = Email::where('status', 'active')->count();
-        
-        return view('emails.index', compact('emailsByDomain', 'emails', 'totalEmails', 'totalMonthlyCost', 'activeEmails'));
+        $emailsByDomain = $allEmails->groupBy('domain_id')->map(function ($emails) {
+            return [
+                'domain' => $emails->first()?->domain,
+                'emails' => $emails,
+                'total_cost' => $emails->sum('billing_total_cost'),
+                'count' => $emails->count(),
+            ];
+        });
+
+        $totalEmails = $allEmails->count();
+        $totalMonthlyCost = $allEmails->sum('billing_total_cost');
+        $activeEmails = $allEmails->where('status', 'active')->count();
+
+        return view('emails.index', compact('emailsByDomain', 'totalEmails', 'totalMonthlyCost', 'activeEmails'));
     }
 
     public function create(): View
@@ -62,9 +45,6 @@ class EmailController extends Controller
         return view('emails.create', compact('domains', 'websites', 'hostingPlans', 'statusOptions'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
@@ -84,11 +64,8 @@ class EmailController extends Controller
             ->calculateEndDate($startDate, $this->billingScheduleService->durationMonthsForHostingPlan($validated['hosting_plan']))
             ->toDateString();
 
-        // Auto-assign domain if not provided
         if (empty($validated['domain_id'])) {
-            $emailParts = explode('@', $validated['email_address']);
-            $domainName = end($emailParts);
-            
+            $domainName = substr($validated['email_address'], strpos($validated['email_address'], '@') + 1);
             $domain = Domain::where('domain_name', $domainName)->first();
             if ($domain) {
                 $validated['domain_id'] = $domain->id;
@@ -131,11 +108,8 @@ class EmailController extends Controller
             ->calculateEndDate($startDate, $this->billingScheduleService->durationMonthsForHostingPlan($validated['hosting_plan'] ?? $email->hosting_plan ?? 'monthly'))
             ->toDateString();
 
-        // Auto-assign domain if not provided
         if (empty($validated['domain_id'])) {
-            $emailParts = explode('@', $validated['email_address']);
-            $domainName = end($emailParts);
-
+            $domainName = substr($validated['email_address'], strpos($validated['email_address'], '@') + 1);
             $domain = Domain::where('domain_name', $domainName)->first();
             if ($domain) {
                 $validated['domain_id'] = $domain->id;
@@ -150,7 +124,6 @@ class EmailController extends Controller
     public function destroy(Email $email): RedirectResponse
     {
         $email->delete();
-
         return redirect()->route('emails.index')->with('success', 'Email account deleted successfully!');
     }
 }

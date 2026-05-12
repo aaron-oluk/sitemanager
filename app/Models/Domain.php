@@ -49,12 +49,11 @@ class Domain extends Model
         return $this->hasMany(Email::class);
     }
 
-    /**
-     * Check if domain is expiring soon (within 30 days)
-     */
     public function isExpiringSoon(): bool
     {
-        return $this->expiry_date && $this->expiry_date->diffInDays(now()) <= 30;
+        return $this->expiry_date
+            && $this->expiry_date->isFuture()
+            && now()->diffInDays($this->expiry_date) <= 30;
     }
 
     /**
@@ -78,12 +77,12 @@ class Domain extends Model
 
     public function getRenewalTaxAmountAttribute(): float
     {
-        return round(((float) $this->annual_cost) * 0.18, 2);
+        return round(((float) $this->annual_cost) * config('billing.tax_rate'), 2);
     }
 
     public function getRenewalTransactionFeeAttribute(): float
     {
-        return round(((float) $this->annual_cost) * 0.025, 2);
+        return round(((float) $this->annual_cost) * config('billing.transaction_fee_rate'), 2);
     }
 
     public function getRenewalTotalCostAttribute(): float

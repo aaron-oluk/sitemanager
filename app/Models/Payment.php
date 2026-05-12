@@ -40,28 +40,10 @@ class Payment extends Model
         return $this->belongsTo(Domain::class);
     }
 
-    /**
-     * Get formatted amount with currency
-     */
     public function getFormattedAmountAttribute(): string
     {
-        $symbols = [
-            'USD' => '$',
-            'UGX' => 'USh ',
-            'EUR' => '€',
-            'GBP' => '£',
-            'KES' => 'KSh ',
-            'TZS' => 'TSh ',
-            'NGN' => '₦',
-        ];
-
-        $symbol = $symbols[$this->currency] ?? $this->currency . ' ';
-        
-        if ($this->currency === 'UGX') {
-            return $symbol . number_format($this->amount, 0);
-        }
-        
-        return $symbol . number_format($this->amount, 2);
+        return app(\App\Services\CurrencyService::class)
+            ->formatAmount((float) $this->amount, $this->currency);
     }
 
     /**
