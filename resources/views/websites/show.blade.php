@@ -1,152 +1,186 @@
 @extends('layouts.app')
 
 @section('content')
-    <header class="bg-white/80 backdrop-blur-sm border-b border-white/20">
-        <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ $website->name }}</h2>
-            <a href="{{ route('websites.edit', $website) }}" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded text-sm font-medium">Edit</a>
-        </div>
-        </div>
-    </header>
+<div class="p-6 space-y-6 max-w-4xl">
 
-    <div class="py-6">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
-            <div class="bg-white rounded shadow border border-gray-100 p-6">
-                <dl class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    {{-- Header --}}
+    <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <a href="{{ route('websites.index') }}" class="text-gray-400 hover:text-gray-600">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+            </a>
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900">{{ $website->name }}</h1>
+                <p class="text-sm text-gray-500 mt-0.5">{{ $website->domain_name }}</p>
+            </div>
+            <span class="text-xs px-2.5 py-1 rounded-full font-medium
+                {{ $website->status === 'active' ? 'bg-green-100 text-green-700' :
+                   ($website->status === 'maintenance' ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-600') }}">
+                {{ ucfirst($website->status) }}
+            </span>
+        </div>
+        <div class="flex gap-2">
+            <a href="{{ route('websites.edit', $website) }}" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-gray-300 bg-white hover:bg-gray-50 text-sm font-medium text-gray-700 transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                Edit
+            </a>
+            <form action="{{ route('websites.destroy', $website) }}" method="POST" onsubmit="return confirm('Delete this website?')">
+                @csrf @method('DELETE')
+                <button type="submit" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-red-200 bg-white hover:bg-red-50 text-sm font-medium text-red-600 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                    Delete
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        {{-- Main details --}}
+        <div class="lg:col-span-2 space-y-6">
+
+            {{-- Client & project --}}
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm">
+                <div class="px-5 py-4 border-b border-gray-100">
+                    <h2 class="font-semibold text-gray-900">Project Details</h2>
+                </div>
+                <dl class="px-5 py-4 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4">
                     <div>
-                        <dt class="text-sm text-gray-500">Website Name</dt>
-                        <dd class="mt-1 text-gray-900 font-medium">{{ $website->name }}</dd>
+                        <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">Client</dt>
+                        <dd class="mt-1 text-sm font-medium text-gray-900">{{ $website->client_name }}</dd>
                     </div>
                     <div>
-                        <dt class="text-sm text-gray-500">Domain</dt>
-                        <dd class="mt-1 text-gray-900 font-medium">{{ $website->domain_name }}</dd>
-                    </div>
-                    @if($website->domain_id)
-                    <div>
-                        <dt class="text-sm text-gray-500">Linked Domain</dt>
-                        <dd class="mt-1 text-gray-900 font-medium">
-                            <a href="{{ route('domains.show', $website->domain_id) }}" class="text-blue-600 hover:text-blue-800">
-                                {{ $website->domainRelation->domain_name ?? 'N/A' }}
-                            </a>
+                        <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">Client Email</dt>
+                        <dd class="mt-1 text-sm text-gray-900">
+                            <a href="mailto:{{ $website->client_email }}" class="text-indigo-600 hover:underline">{{ $website->client_email }}</a>
                         </dd>
                     </div>
                     <div>
-                        <dt class="text-sm text-gray-500">Domain Registration Date</dt>
-                        <dd class="mt-1 text-gray-900 font-medium">
-                            {{ optional($website->domainRelation->registration_date)->format('M d, Y') ?? 'N/A' }}
-                        </dd>
+                        <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">Host Server</dt>
+                        <dd class="mt-1 text-sm font-medium text-gray-900">{{ $website->host_server }}</dd>
                     </div>
                     <div>
-                        <dt class="text-sm text-gray-500">Domain Expiry Date</dt>
-                        <dd class="mt-1 text-gray-900 font-medium">
-                            @if($website->domainRelation && $website->domainRelation->isExpiringSoon())
-                                <span class="text-orange-600 font-medium">
-                                    {{ optional($website->domainRelation->expiry_date)->format('M d, Y') }} 
-                                    ({{ $website->domainRelation->days_until_expiry }} days)
-                                </span>
-                            @else
-                                {{ optional($website->domainRelation->expiry_date)->format('M d, Y') ?? 'N/A' }}
+                        <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">Deployed</dt>
+                        <dd class="mt-1 text-sm font-medium text-gray-900">{{ optional($website->deployment_date)->format('M j, Y') }}</dd>
+                    </div>
+                    @if($website->description)
+                    <div class="sm:col-span-2">
+                        <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">Description</dt>
+                        <dd class="mt-1 text-sm text-gray-700">{{ $website->description }}</dd>
+                    </div>
+                    @endif
+                </dl>
+            </div>
+
+            {{-- Domain info --}}
+            @if($website->domain_id && $website->domainRelation)
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm">
+                <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+                    <h2 class="font-semibold text-gray-900">Domain</h2>
+                    <a href="{{ route('domains.show', $website->domain_id) }}" class="text-xs text-indigo-600 hover:text-indigo-800 font-medium">View domain →</a>
+                </div>
+                <dl class="px-5 py-4 grid grid-cols-1 sm:grid-cols-3 gap-x-8 gap-y-4">
+                    <div>
+                        <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">Name</dt>
+                        <dd class="mt-1 text-sm font-medium text-gray-900">{{ $website->domainRelation->domain_name }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">Registered</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ optional($website->domainRelation->registration_date)->format('M j, Y') }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">Expires</dt>
+                        <dd class="mt-1 text-sm {{ $website->domainRelation->isExpiringSoon() ? 'text-amber-600 font-semibold' : 'text-gray-900' }}">
+                            {{ optional($website->domainRelation->expiry_date)->format('M j, Y') }}
+                            @if($website->domainRelation->isExpiringSoon())
+                                <span class="block text-xs font-normal">⚠ {{ now()->diffInDays($website->domainRelation->expiry_date) }} days left</span>
                             @endif
                         </dd>
                     </div>
-                    @endif
-                    <div>
-                        <dt class="text-sm text-gray-500">Host Server</dt>
-                        <dd class="mt-1 text-gray-900 font-medium">{{ $website->host_server }}</dd>
-                    </div>
-                    <div>
-                        <dt class="text-sm text-gray-500">Deployment Date</dt>
-                        <dd class="mt-1 text-gray-900 font-medium">{{ optional($website->deployment_date)->format('M d, Y') }}</dd>
-                    </div>
-                    <div>
-                        <dt class="text-sm text-gray-500">Amount Paid</dt>
-                        <dd class="mt-1 text-gray-900 font-medium">{{ $website->formatted_amount }}</dd>
-                    </div>
-                    <div>
-                        <dt class="text-sm text-gray-500">Amount Includes Domain</dt>
-                        <dd class="mt-1 text-gray-900 font-medium">{{ $website->amount_includes_domain ? 'Yes' : 'No' }}</dd>
-                    </div>
-                    <div>
-                        <dt class="text-sm text-gray-500">Domain Purchased</dt>
-                        <dd class="mt-1 text-gray-900 font-medium">{{ $website->domain_purchased ? 'Yes' : 'No (Using existing domain)' }}</dd>
-                    </div>
-                    @if($website->domain_purchased)
-                    <div>
-                        <dt class="text-sm text-gray-500">Domain Base Cost</dt>
-                        <dd class="mt-1 text-gray-900 font-medium">{{ $website->formatted_domain_base_cost }}</dd>
-                    </div>
-                    <div>
-                        <dt class="text-sm text-gray-500">Domain Tax (18%)</dt>
-                        <dd class="mt-1 text-gray-900 font-medium">{{ $website->formatted_domain_tax_amount }}</dd>
-                    </div>
-                    <div>
-                        <dt class="text-sm text-gray-500">Transaction Fee (2.5%)</dt>
-                        <dd class="mt-1 text-gray-900 font-medium">{{ $website->formatted_domain_transaction_fee }}</dd>
-                    </div>
-                    <div>
-                        <dt class="text-sm text-gray-500">Domain Total Cost</dt>
-                        <dd class="mt-1 text-gray-900 font-semibold">{{ $website->formatted_domain_total_cost }}</dd>
-                    </div>
-                    @endif
-                    <div>
-                        <dt class="text-sm text-gray-500">Currency</dt>
-                        <dd class="mt-1 text-gray-900 font-medium">{{ $website->currency }}</dd>
-                    </div>
-                    <div>
-                        <dt class="text-sm text-gray-500">USD Equivalent</dt>
-                        <dd class="mt-1 text-gray-600">{{ $website->formatted_usd_equivalent }}</dd>
-                    </div>
-                    <div>
-                        <dt class="text-sm text-gray-500">Status</dt>
-                        <dd class="mt-1"><span class="px-2 py-1 rounded-full text-xs {{ $website->status === 'active' ? 'bg-green-100 text-green-700' : ($website->status === 'inactive' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700') }}">{{ ucfirst($website->status) }}</span></dd>
-                    </div>
-                    <div>
-                        <dt class="text-sm text-gray-500">Client Name</dt>
-                        <dd class="mt-1 text-gray-900 font-medium">{{ $website->client_name }}</dd>
-                    </div>
-                    <div>
-                        <dt class="text-sm text-gray-500">Client Email</dt>
-                        <dd class="mt-1 text-gray-900 font-medium">{{ $website->client_email }}</dd>
-                    </div>
                 </dl>
-                @if($website->description)
-                    <div class="mt-6">
-                        <dt class="text-sm text-gray-500">Description</dt>
-                        <dd class="mt-1 text-gray-900">{{ $website->description }}</dd>
+            </div>
+            @endif
+
+            {{-- Domain cost breakdown --}}
+            @if($website->domain_purchased)
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm">
+                <div class="px-5 py-4 border-b border-gray-100">
+                    <h2 class="font-semibold text-gray-900">Domain Cost Breakdown</h2>
+                </div>
+                <div class="px-5 py-4">
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between text-gray-600">
+                            <span>Base cost</span>
+                            <span>{{ $website->formatted_domain_base_cost }}</span>
+                        </div>
+                        <div class="flex justify-between text-gray-600">
+                            <span>Tax (18%)</span>
+                            <span>{{ $website->formatted_domain_tax_amount }}</span>
+                        </div>
+                        <div class="flex justify-between text-gray-600">
+                            <span>Transaction fee (2.5%)</span>
+                            <span>{{ $website->formatted_domain_transaction_fee }}</span>
+                        </div>
+                        <div class="flex justify-between font-semibold text-gray-900 pt-2 border-t border-gray-100">
+                            <span>Total</span>
+                            <span>{{ $website->formatted_domain_total_cost }}</span>
+                        </div>
                     </div>
+                </div>
+            </div>
+            @endif
+
+            {{-- Payments --}}
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm">
+                <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+                    <h2 class="font-semibold text-gray-900">Payments</h2>
+                    <a href="{{ route('payments.create') }}" class="text-xs text-indigo-600 hover:text-indigo-800 font-medium">+ Record</a>
+                </div>
+                @if($website->payments->isEmpty())
+                    <p class="px-5 py-6 text-sm text-gray-500 text-center">No payments recorded.</p>
+                @else
+                <div class="divide-y divide-gray-50">
+                    @foreach($website->payments as $payment)
+                    <div class="flex items-center justify-between px-5 py-3">
+                        <div>
+                            <p class="text-sm font-medium text-gray-900">{{ $payment->formatted_amount }}</p>
+                            <p class="text-xs text-gray-500">{{ $payment->payment_method }} · {{ optional($payment->payment_date)->format('M j, Y') }}</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="text-xs text-gray-400">{{ $payment->formatted_usd_equivalent }}</span>
+                            <a href="{{ route('payments.show', $payment) }}" class="text-xs text-indigo-600 hover:text-indigo-800">View</a>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
                 @endif
             </div>
+        </div>
 
-            <div class="bg-white rounded shadow border border-gray-100 p-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Payments</h3>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Method</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-100">
-                            @forelse ($website->payments as $payment)
-                                <tr>
-                                    <td class="px-4 py-3 text-sm text-gray-700">{{ optional($payment->payment_date)->format('M d, Y') }}</td>
-                                    <td class="px-4 py-3 text-sm text-gray-700">{{ $payment->payment_method }}</td>
-                                    <td class="px-4 py-3 text-sm text-gray-900 font-semibold">${{ number_format($payment->amount, 2) }}</td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="3" class="px-4 py-6 text-center text-gray-500">No payments recorded.</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
+        {{-- Sidebar --}}
+        <div class="space-y-4">
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm">
+                <div class="px-5 py-4 border-b border-gray-100">
+                    <h2 class="font-semibold text-gray-900">Financials</h2>
+                </div>
+                <div class="px-5 py-4 space-y-3">
+                    <div>
+                        <p class="text-xs text-gray-500">Amount charged</p>
+                        <p class="text-xl font-bold text-gray-900 mt-0.5">{{ $website->formatted_amount }}</p>
+                        <p class="text-xs text-gray-400">≈ {{ $website->formatted_usd_equivalent }}</p>
+                    </div>
+                    <div class="pt-2 border-t border-gray-100">
+                        <p class="text-xs text-gray-500">Currency</p>
+                        <p class="text-sm font-medium text-gray-900 mt-0.5">{{ $website->currency }}</p>
+                    </div>
+                    <div class="pt-2 border-t border-gray-100">
+                        <p class="text-xs text-gray-500">Domain included</p>
+                        <p class="text-sm font-medium text-gray-900 mt-0.5">{{ $website->amount_includes_domain ? 'Yes' : 'No' }}</p>
+                    </div>
                 </div>
             </div>
         </div>
+
     </div>
+</div>
 @endsection
-
-

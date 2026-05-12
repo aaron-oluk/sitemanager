@@ -1,192 +1,187 @@
 @extends('layouts.app')
 
 @section('content')
-    <header class="bg-white/80 backdrop-blur-sm border-b border-white/20">
-        <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Edit Domain') }}</h2>
-        </div>
-    </header>
+<div class="p-6 space-y-6 max-w-3xl">
 
-    <div class="py-6">
-        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-            @if($errors->any())
-                <div class="mb-4 p-3 rounded bg-red-50 text-red-700 border border-red-200">
-                    <ul class="list-disc ms-5">
-                        @foreach($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
-
-            <form method="POST" action="{{ route('domains.update', $domain) }}" class="bg-white rounded shadow border border-gray-100 p-6 space-y-6">
-                @csrf
-                @method('PUT')
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Domain Name</label>
-                        <input name="domain_name" value="{{ old('domain_name', $domain->domain_name) }}" required class="mt-1 w-full rounded-md border-gray-300 focus:ring-2 focus:ring-purple-500" />
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Registrar</label>
-                        <input name="registrar" value="{{ old('registrar', $domain->registrar) }}" required class="mt-1 w-full rounded-md border-gray-300 focus:ring-2 focus:ring-purple-500" />
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Registration Date</label>
-                        <input type="date" name="registration_date" value="{{ old('registration_date', optional($domain->registration_date)->format('Y-m-d')) }}" required class="mt-1 w-full rounded-md border-gray-300 focus:ring-2 focus:ring-purple-500" />
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Subscription Duration</label>
-                        <select id="subscription_duration_edit" name="subscription_duration_months" required class="mt-1 w-full rounded-md border-gray-300 focus:ring-2 focus:ring-purple-500">
-                            @foreach($durationOptions as $months => $label)
-                                <option value="{{ $months }}" {{ old('subscription_duration_months', $selectedDurationMonths) == $months ? 'selected' : '' }}>{{ $label }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Calculated Expiry Date</label>
-                        <input id="calculated_expiry_edit" type="date" value="{{ optional($domain->expiry_date)->format('Y-m-d') }}" readonly class="mt-1 w-full rounded-md border-gray-300 bg-gray-50" />
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Annual Cost</label>
-                        <input type="number" step="0.01" name="annual_cost" value="{{ old('annual_cost', $domain->annual_cost) }}" required class="mt-1 w-full rounded-md border-gray-300 focus:ring-2 focus:ring-purple-500" />
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Status</label>
-                        <select name="status" class="mt-1 w-full rounded-md border-gray-300 focus:ring-2 focus:ring-purple-500">
-                            @foreach(['active','expired','pending'] as $status)
-                                <option value="{{ $status }}" {{ old('status', $domain->status)===$status?'selected':'' }}>{{ ucfirst($status) }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                </div>
-
-                <div class="p-4 bg-purple-50 rounded border border-purple-200 space-y-4">
-                    <h3 class="text-sm font-medium text-purple-900">Domain Renewal Calculator</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label for="renewal_base_cost_edit" class="block text-sm font-medium text-gray-700">Renewal Base Cost</label>
-                            <input id="renewal_base_cost_edit" type="number" step="0.01" min="0" value="{{ old('annual_cost', $domain->annual_cost) }}" class="mt-1 w-full rounded-md border-gray-300 focus:ring-2 focus:ring-purple-500" />
-                            <button id="calculate-renewal-edit" type="button" class="mt-3 px-4 py-2 rounded bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium">Calculate Renewal</button>
-                        </div>
-                        <div class="grid grid-cols-1 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700">Billing Frequency</label>
-                                <select id="renewal_billing_frequency_edit" class="mt-1 w-full rounded-md border-gray-300 focus:ring-2 focus:ring-purple-500">
-                                    <option value="annual" selected>Annual</option>
-                                    <option value="monthly">Monthly</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700">Renewal Tax (18%)</label>
-                                <input id="renewal_tax_preview_edit" type="text" class="mt-1 w-full rounded-md border-gray-300 bg-gray-50" readonly />
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700">Renewal Transaction Fee (2.5%)</label>
-                                <input id="renewal_txn_preview_edit" type="text" class="mt-1 w-full rounded-md border-gray-300 bg-gray-50" readonly />
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700">Renewal Total Cost</label>
-                                <input id="renewal_total_preview_edit" type="text" class="mt-1 w-full rounded-md border-gray-300 bg-gray-50" readonly />
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700">Number of Payments</label>
-                                <input id="renewal_payment_count_edit" type="text" class="mt-1 w-full rounded-md border-gray-300 bg-gray-50" readonly />
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700">Amount Per Payment</label>
-                                <input id="renewal_payment_amount_edit" type="text" class="mt-1 w-full rounded-md border-gray-300 bg-gray-50" readonly />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Notes</label>
-                    <textarea name="notes" rows="4" class="mt-1 w-full rounded-md border-gray-300 focus:ring-2 focus:ring-purple-500">{{ old('notes', $domain->notes) }}</textarea>
-                </div>
-
-                <div class="flex items-center justify-end gap-3">
-                    <a href="{{ route('domains.index') }}" class="px-4 py-2 rounded border">Cancel</a>
-                    <button class="px-4 py-2 rounded bg-purple-600 hover:bg-purple-700 text-white">Update</button>
-                </div>
-            </form>
+    {{-- Header --}}
+    <div class="flex items-center gap-3">
+        <a href="{{ route('domains.show', $domain) }}" class="text-gray-400 hover:text-gray-600">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+        </a>
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">Edit Domain</h1>
+            <p class="text-sm text-gray-500 mt-0.5">{{ $domain->domain_name }}</p>
         </div>
     </div>
 
-    <script>
-        (function () {
-            const registrationInput = document.querySelector('input[name="registration_date"]');
-            const durationSelect = document.getElementById('subscription_duration_edit');
-            const expiryPreview = document.getElementById('calculated_expiry_edit');
-            const baseInput = document.getElementById('renewal_base_cost_edit');
-            const frequencySelect = document.getElementById('renewal_billing_frequency_edit');
-            const calculateButton = document.getElementById('calculate-renewal-edit');
-            const taxPreview = document.getElementById('renewal_tax_preview_edit');
-            const txnPreview = document.getElementById('renewal_txn_preview_edit');
-            const totalPreview = document.getElementById('renewal_total_preview_edit');
-            const paymentCountPreview = document.getElementById('renewal_payment_count_edit');
-            const paymentAmountPreview = document.getElementById('renewal_payment_amount_edit');
+    @if($errors->any())
+    <div class="bg-red-50 border border-red-200 rounded-xl p-4">
+        <ul class="list-disc list-inside space-y-1 text-sm text-red-700">
+            @foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach
+        </ul>
+    </div>
+    @endif
 
-            if (!registrationInput || !durationSelect || !expiryPreview || !baseInput || !frequencySelect || !calculateButton || !taxPreview || !txnPreview || !totalPreview || !paymentCountPreview || !paymentAmountPreview) {
-                return;
-            }
+    <form method="POST" action="{{ route('domains.update', $domain) }}" class="space-y-5">
+        @csrf
+        @method('PUT')
 
-            function formatMoney(value) {
-                return '$' + Number(value || 0).toFixed(2);
-            }
+        {{-- Registration details --}}
+        <div class="bg-white rounded-xl border border-gray-200 shadow-sm">
+            <div class="px-5 py-4 border-b border-gray-100">
+                <h2 class="font-semibold text-gray-900">Registration Details</h2>
+            </div>
+            <div class="px-5 py-4 grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div>
+                    <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Domain Name</label>
+                    <input name="domain_name" value="{{ old('domain_name', $domain->domain_name) }}" required class="w-full rounded-lg border-gray-300 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Registrar</label>
+                    <input name="registrar" value="{{ old('registrar', $domain->registrar) }}" required class="w-full rounded-lg border-gray-300 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Registration Date</label>
+                    <input type="date" name="registration_date" value="{{ old('registration_date', optional($domain->registration_date)->format('Y-m-d')) }}" required class="w-full rounded-lg border-gray-300 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Subscription Duration</label>
+                    <select id="subscription_duration_edit" name="subscription_duration_months" required class="w-full rounded-lg border-gray-300 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        @foreach($durationOptions as $months => $label)
+                            <option value="{{ $months }}" {{ old('subscription_duration_months', $selectedDurationMonths) == $months ? 'selected' : '' }}>{{ $label }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Calculated Expiry Date</label>
+                    <input id="calculated_expiry_edit" type="date" value="{{ optional($domain->expiry_date)->format('Y-m-d') }}" readonly class="w-full rounded-lg border-gray-200 bg-gray-50 text-sm text-gray-600" />
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Annual Cost ($)</label>
+                    <input type="number" step="0.01" name="annual_cost" value="{{ old('annual_cost', $domain->annual_cost) }}" required class="w-full rounded-lg border-gray-300 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Status</label>
+                    <select name="status" class="w-full rounded-lg border-gray-300 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        @foreach(['active','expired','pending'] as $s)
+                            <option value="{{ $s }}" {{ old('status', $domain->status)===$s?'selected':'' }}>{{ ucfirst($s) }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Notes</label>
+                    <textarea name="notes" rows="3" class="w-full rounded-lg border-gray-300 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">{{ old('notes', $domain->notes) }}</textarea>
+                </div>
+            </div>
+        </div>
 
-            function updateRenewalPreview() {
-                const base = Math.max(parseFloat(baseInput.value || '0'), 0);
-                const tax = base * 0.18;
-                const txn = base * 0.025;
-                const total = Math.ceil(base + tax + txn);
-                const durationMonths = parseInt(durationSelect.value || '12', 10);
-                const paymentCount = frequencySelect.value === 'monthly' ? durationMonths : Math.max(1, Math.ceil(durationMonths / 12));
-                const amountPerPayment = paymentCount > 0 ? total / paymentCount : total;
+        {{-- Renewal calculator --}}
+        <div class="bg-white rounded-xl border border-gray-200 shadow-sm">
+            <div class="px-5 py-4 border-b border-gray-100">
+                <h2 class="font-semibold text-gray-900">Renewal Cost Estimator</h2>
+                <p class="text-xs text-gray-500 mt-0.5">Preview what renewal will cost — does not affect saved data.</p>
+            </div>
+            <div class="px-5 py-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-4">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Renewal Base Cost ($)</label>
+                        <input id="renewal_base_cost_edit" type="number" step="0.01" min="0" value="{{ old('annual_cost', $domain->annual_cost) }}" class="w-full rounded-lg border-gray-300 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Billing Frequency</label>
+                        <select id="renewal_billing_frequency_edit" class="w-full rounded-lg border-gray-300 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                            <option value="annual" selected>Annual</option>
+                            <option value="monthly">Monthly</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="bg-gray-50 rounded-xl border border-gray-100 px-5 py-4">
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        <div>
+                            <p class="text-xs text-gray-500 mb-1">Tax (18%)</p>
+                            <input id="renewal_tax_preview_edit" type="text" class="w-full rounded-lg border-gray-200 bg-white text-sm text-gray-600" readonly />
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-500 mb-1">Fee (2.5%)</p>
+                            <input id="renewal_txn_preview_edit" type="text" class="w-full rounded-lg border-gray-200 bg-white text-sm text-gray-600" readonly />
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-500 mb-1">Total</p>
+                            <input id="renewal_total_preview_edit" type="text" class="w-full rounded-lg border-gray-200 bg-white text-sm font-semibold text-gray-900" readonly />
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-500 mb-1">No. of Payments</p>
+                            <input id="renewal_payment_count_edit" type="text" class="w-full rounded-lg border-gray-200 bg-white text-sm text-gray-600" readonly />
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-500 mb-1">Amount per Payment</p>
+                            <input id="renewal_payment_amount_edit" type="text" class="w-full rounded-lg border-gray-200 bg-white text-sm font-semibold text-gray-900" readonly />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-                taxPreview.value = formatMoney(tax);
-                txnPreview.value = formatMoney(txn);
-                totalPreview.value = formatMoney(total);
-                paymentCountPreview.value = String(paymentCount);
-                paymentAmountPreview.value = formatMoney(amountPerPayment);
-            }
+        <div class="flex items-center justify-end gap-3">
+            <a href="{{ route('domains.show', $domain) }}" class="px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">Cancel</a>
+            <button type="submit" class="px-5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-sm font-medium text-white transition-colors">Update Domain</button>
+        </div>
+    </form>
 
-            function updateExpiryPreview() {
-                const registrationDate = registrationInput.value;
-                const durationMonths = parseInt(durationSelect.value || '12', 10);
-
-                if (!registrationDate) {
-                    expiryPreview.value = '';
-                    return;
-                }
-
-                const date = new Date(registrationDate + 'T00:00:00');
-                date.setMonth(date.getMonth() + durationMonths);
-
-                const year = date.getFullYear();
-                const month = String(date.getMonth() + 1).padStart(2, '0');
-                const day = String(date.getDate()).padStart(2, '0');
-                expiryPreview.value = year + '-' + month + '-' + day;
-            }
-
-            calculateButton.addEventListener('click', updateRenewalPreview);
-            registrationInput.addEventListener('input', updateExpiryPreview);
-            durationSelect.addEventListener('change', updateExpiryPreview);
-            frequencySelect.addEventListener('change', updateRenewalPreview);
-            baseInput.addEventListener('input', updateRenewalPreview);
-            baseInput.addEventListener('keydown', function (event) {
-                if (event.key === 'Enter') {
-                    event.preventDefault();
-                    updateRenewalPreview();
-                }
-            });
-
-            updateExpiryPreview();
-            updateRenewalPreview();
-        })();
-    </script>
+</div>
 @endsection
 
+@section('scripts')
+<script>
+(function () {
+    const registrationInput = document.querySelector('input[name="registration_date"]');
+    const durationSelect = document.getElementById('subscription_duration_edit');
+    const expiryPreview = document.getElementById('calculated_expiry_edit');
+    const baseInput = document.getElementById('renewal_base_cost_edit');
+    const frequencySelect = document.getElementById('renewal_billing_frequency_edit');
+    const taxPreview = document.getElementById('renewal_tax_preview_edit');
+    const txnPreview = document.getElementById('renewal_txn_preview_edit');
+    const totalPreview = document.getElementById('renewal_total_preview_edit');
+    const paymentCountPreview = document.getElementById('renewal_payment_count_edit');
+    const paymentAmountPreview = document.getElementById('renewal_payment_amount_edit');
 
+    function formatMoney(value) { return '$' + Number(value || 0).toFixed(2); }
+
+    function updateRenewalPreview() {
+        const base = Math.max(parseFloat(baseInput.value || '0'), 0);
+        const tax = base * 0.18;
+        const txn = base * 0.025;
+        const total = Math.ceil(base + tax + txn);
+        const durationMonths = parseInt(durationSelect.value || '12', 10);
+        const paymentCount = frequencySelect.value === 'monthly' ? durationMonths : Math.max(1, Math.ceil(durationMonths / 12));
+        const amountPerPayment = paymentCount > 0 ? total / paymentCount : total;
+        taxPreview.value = formatMoney(tax);
+        txnPreview.value = formatMoney(txn);
+        totalPreview.value = formatMoney(total);
+        paymentCountPreview.value = String(paymentCount);
+        paymentAmountPreview.value = formatMoney(amountPerPayment);
+    }
+
+    function updateExpiryPreview() {
+        const registrationDate = registrationInput.value;
+        const durationMonths = parseInt(durationSelect.value || '12', 10);
+        if (!registrationDate) { expiryPreview.value = ''; return; }
+        const date = new Date(registrationDate + 'T00:00:00');
+        date.setMonth(date.getMonth() + durationMonths);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        expiryPreview.value = year + '-' + month + '-' + day;
+    }
+
+    baseInput.addEventListener('input', updateRenewalPreview);
+    baseInput.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); updateRenewalPreview(); } });
+    frequencySelect.addEventListener('change', updateRenewalPreview);
+    registrationInput.addEventListener('input', updateExpiryPreview);
+    durationSelect.addEventListener('change', () => { updateExpiryPreview(); updateRenewalPreview(); });
+
+    updateExpiryPreview();
+    updateRenewalPreview();
+})();
+</script>
+@endsection

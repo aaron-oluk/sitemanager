@@ -1,80 +1,89 @@
 @extends('layouts.app')
 
 @section('content')
-    <header class="bg-white/80 backdrop-blur-sm border-b border-white/20">
-        <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Payments') }}</h2>
-            <a href="{{ route('payments.create') }}" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-sm font-medium">Record Payment</a>
-        </div>
-        </div>
-    </header>
+<div class="p-6 space-y-6">
 
-    <div class="py-6">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            @if(session('success'))
-                <div class="mb-4 p-3 rounded bg-green-50 text-green-700 border border-green-200">{{ session('success') }}</div>
-            @endif
-
-            <div class="bg-white rounded shadow border border-gray-100 overflow-hidden">
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Source</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Method</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">USD Equivalent</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                <th class="px-4 py-3"></th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-100">
-                            @forelse ($payments as $payment)
-                                <tr>
-                                    <td class="px-4 py-3 text-sm text-gray-900 font-medium">
-                                        @if($payment->payment_type === 'domain')
-                                            <span class="text-xs text-purple-600 font-normal">Domain</span><br>
-                                            {{ $payment->domain->domain_name ?? 'N/A' }}
-                                        @else
-                                            <span class="text-xs text-blue-600 font-normal">Website</span><br>
-                                            {{ $payment->website->name ?? 'N/A' }}
-                                        @endif
-                                    </td>
-                                    <td class="px-4 py-3 text-sm text-gray-700">{{ $payment->payment_method }}</td>
-                                    <td class="px-4 py-3 text-sm text-gray-700">{{ optional($payment->payment_date)->format('M d, Y') }}</td>
-                                    <td class="px-4 py-3 text-sm text-gray-900 font-semibold">
-                                        {{ $payment->formatted_amount }}
-                                    </td>
-                                    <td class="px-4 py-3 text-sm text-gray-600">
-                                        {{ $payment->formatted_usd_equivalent }}
-                                    </td>
-                                    <td class="px-4 py-3 text-sm">
-                                        <span class="px-2 py-1 rounded-full text-xs {{ $payment->status === 'completed' ? 'bg-green-100 text-green-700' : ($payment->status === 'pending' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700') }}">{{ ucfirst($payment->status) }}</span>
-                                    </td>
-                                    <td class="px-4 py-3 text-sm text-right whitespace-nowrap space-x-2">
-                                        <a href="{{ route('payments.show', $payment) }}" class="text-blue-600 hover:text-blue-800">View</a>
-                                        <a href="{{ route('payments.edit', $payment) }}" class="text-indigo-600 hover:text-indigo-800">Edit</a>
-                                        <form action="{{ route('payments.destroy', $payment) }}" method="POST" class="inline" onsubmit="return confirm('Delete this payment?')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="text-red-600 hover:text-red-800">Delete</button>
-                                        </form>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="7" class="px-4 py-6 text-center text-gray-500">No payments found.</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-                <div class="px-4 py-3">{{ $payments->links() }}</div>
-            </div>
+    {{-- Header --}}
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">Payments</h1>
+            <p class="text-sm text-gray-500 mt-0.5">All recorded income</p>
         </div>
+        <a href="{{ route('payments.create') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-sm font-medium text-white transition-colors">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+            Record Payment
+        </a>
     </div>
+
+    {{-- Table --}}
+    <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+        <table class="min-w-full divide-y divide-gray-100">
+            <thead>
+                <tr class="bg-gray-50">
+                    <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">For</th>
+                    <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Method</th>
+                    <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
+                    <th class="px-5 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Amount</th>
+                    <th class="px-5 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">USD</th>
+                    <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                    <th class="px-5 py-3"></th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-50">
+                @forelse($payments as $payment)
+                <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="px-5 py-3.5">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs px-1.5 py-0.5 rounded font-medium
+                                {{ $payment->payment_type === 'domain' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700' }}">
+                                {{ ucfirst($payment->payment_type) }}
+                            </span>
+                            <span class="text-sm font-medium text-gray-900">
+                                @if($payment->payment_type === 'domain')
+                                    {{ $payment->domain->domain_name ?? 'N/A' }}
+                                @else
+                                    {{ $payment->website->name ?? 'N/A' }}
+                                @endif
+                            </span>
+                        </div>
+                    </td>
+                    <td class="px-5 py-3.5 text-sm text-gray-600">{{ $payment->payment_method }}</td>
+                    <td class="px-5 py-3.5 text-sm text-gray-600">{{ optional($payment->payment_date)->format('M j, Y') }}</td>
+                    <td class="px-5 py-3.5 text-sm font-semibold text-gray-900 text-right">{{ $payment->formatted_amount }}</td>
+                    <td class="px-5 py-3.5 text-sm text-gray-500 text-right">{{ $payment->formatted_usd_equivalent }}</td>
+                    <td class="px-5 py-3.5">
+                        <span class="text-xs px-2 py-0.5 rounded-full font-medium
+                            {{ $payment->status === 'completed' ? 'bg-green-100 text-green-700' :
+                               ($payment->status === 'pending' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700') }}">
+                            {{ ucfirst($payment->status) }}
+                        </span>
+                    </td>
+                    <td class="px-5 py-3.5 text-right whitespace-nowrap">
+                        <div class="flex items-center justify-end gap-3 text-sm">
+                            <a href="{{ route('payments.receipt', $payment) }}" class="text-gray-500 hover:text-gray-700" title="Receipt">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                            </a>
+                            <a href="{{ route('payments.show', $payment) }}" class="text-indigo-600 hover:text-indigo-800 font-medium">View</a>
+                            <a href="{{ route('payments.edit', $payment) }}" class="text-gray-500 hover:text-gray-700">Edit</a>
+                            <form action="{{ route('payments.destroy', $payment) }}" method="POST" class="inline" onsubmit="return confirm('Delete this payment?')">
+                                @csrf @method('DELETE')
+                                <button type="submit" class="text-red-500 hover:text-red-700">Delete</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                @empty
+                <tr>
+                    <td colspan="7" class="px-5 py-12 text-center text-sm text-gray-500">
+                        No payments recorded yet.
+                        <a href="{{ route('payments.create') }}" class="text-indigo-600 hover:underline ml-1">Record one →</a>
+                    </td>
+                </tr>
+                @endforelse
+            </tbody>
+        </table>
+        <div class="px-5 py-3 border-t border-gray-100">{{ $payments->links() }}</div>
+    </div>
+
+</div>
 @endsection
-
-

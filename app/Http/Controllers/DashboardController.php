@@ -20,21 +20,29 @@ class DashboardController extends Controller
         $monthlyRevenue = Payment::where('payment_date', '>=', now()->startOfMonth())->sum('usd_equivalent');
         $totalRevenue = Payment::sum('usd_equivalent');
 
+        $expiringDomains = Domain::where('expiry_date', '>', now())
+            ->where('expiry_date', '<=', now()->addDays(30))
+            ->orderBy('expiry_date')
+            ->get();
+
+        $expiringEmails = Email::where('renewal_date', '>', now())
+            ->where('renewal_date', '<=', now()->addDays(30))
+            ->orderBy('renewal_date')
+            ->get();
+
         $stats = [
             'total_websites' => Website::count(),
             'total_revenue' => $totalRevenue,
             'monthly_revenue' => $monthlyRevenue,
             'active_websites' => Website::where('status', 'active')->count(),
             'total_domains' => Domain::count(),
-            'expiring_domains' => Domain::where('expiry_date', '>', now())
-                ->where('expiry_date', '<=', now()->addDays(30))
-                ->count(),
+            'expiring_domains' => $expiringDomains->count(),
             'total_emails' => Email::count(),
             'monthly_email_cost' => Email::sum('monthly_cost'),
             'total_domain_cost' => Domain::sum('annual_cost'),
             'active_email_plans' => Email::where('status', 'active')->count(),
         ];
 
-        return view('dashboard', compact('websites', 'domains', 'emails', 'recentPayments', 'stats'));
+        return view('dashboard', compact('websites', 'domains', 'emails', 'recentPayments', 'stats', 'expiringDomains', 'expiringEmails'));
     }
 }
